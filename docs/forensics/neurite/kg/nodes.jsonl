@@ -1,0 +1,133 @@
+{"id":"repo.neurite","type":"Repository","name":"satellitecomponent/Neurite","url":"https://github.com/satellitecomponent/Neurite"}
+{"id":"spec.main","type":"Specimen","repository_id":"repo.neurite","branch":"main","commit":"e62b270402b688a39a864007b9c0a02711b9573e","tree":"d23fee7f1ade4886841a1e595540ad3a00a41ec6","role":"web/browser behavioral specimen"}
+{"id":"spec.electron","type":"Specimen","repository_id":"repo.neurite","branch":"electron","commit":"ab38b3f8d7edb53ba78affff91f30295d0282701","tree":"d5231b9fd5cd0e67d290a08d17dbaa82434382d6","role":"desktop behavioral specimen"}
+{"id":"artifact.main","type":"SourceArtifact","specimen_id":"spec.main","path":"js/main.js","blob_sha":"ceb2ed3d5faa03612c11dd02da884a3ec1651528","size":12549}
+{"id":"artifact.globals","type":"SourceArtifact","specimen_id":"spec.main","path":"js/globals.js","blob_sha":"bfa0802451b92f7dd0db4b8695aee0f474d48825","size":17310}
+{"id":"artifact.graph","type":"SourceArtifact","specimen_id":"spec.main","path":"js/nodes/nodeutilities.js","blob_sha":"d1f4d50ca71c0d47582f18b7ffc03dce73360659","size":10660}
+{"id":"artifact.node","type":"SourceArtifact","specimen_id":"spec.main","path":"js/nodes/nodeclass.js","blob_sha":"990972e7cf640ec44ba0d3121cc945c77687a6a9","size":17256}
+{"id":"artifact.edge","type":"SourceArtifact","specimen_id":"spec.main","path":"js/nodes/edgeclass.js","blob_sha":"ceca876f6820e9c9b7613fd351a7f12e196e97e6","size":15395}
+{"id":"artifact.create","type":"SourceArtifact","specimen_id":"spec.main","path":"js/nodes/createnodes/createnodes.js","blob_sha":"fba7079be9ee3a42ac72a2585b94660c53ce2035","size":6888}
+{"id":"artifact.connect","type":"SourceArtifact","specimen_id":"spec.main","path":"js/nodes/nodeinteraction/connect.js","blob_sha":"1459c81a8fe17d02c590117aa7e16886662e98dc","size":6870}
+{"id":"artifact.move","type":"SourceArtifact","specimen_id":"spec.main","path":"js/nodes/nodeinteraction/movenodes.js","blob_sha":"71ff51619d9f1b1ba0a20a513fc799f753149dac","size":1888}
+{"id":"artifact.frame","type":"SourceArtifact","specimen_id":"spec.main","path":"js/nodes/nodeinteraction/nodestep.js","blob_sha":"decbc1bae45ea229672f27c0a432851ea351a3cd","size":5951}
+{"id":"artifact.actions","type":"SourceArtifact","specimen_id":"spec.main","path":"js/nodes/nodeinteraction/nodeactioninterface.js","blob_sha":"b6eaad0bb38fbf1d83e0980f986b8809a5d96ed3","size":8466}
+{"id":"artifact.code","type":"SourceArtifact","specimen_id":"spec.main","path":"js/nodes/nodeinteraction/bundlecode.js","blob_sha":"33ed2b14553dbd5db6cd03a1e4a66b9e06c1ed90","size":8683}
+{"id":"artifact.zettel","type":"SourceArtifact","specimen_id":"spec.main","path":"js/zettelkasten/zettelkasten.js","blob_sha":"0271c9964690e9e6dd5788f116cb34fd508462c6","size":23381}
+{"id":"artifact.zetcm","type":"SourceArtifact","specimen_id":"spec.main","path":"js/zettelkasten/zetcodemirror.js","blob_sha":"a3ab8c6fafc8b2ec9ddf055a347bd61f56452932","size":24632}
+{"id":"artifact.save","type":"SourceArtifact","specimen_id":"spec.main","path":"js/interface/dropdown/savenet.js","blob_sha":"0f0574196e88450b40fc70fbad0a150f8243439d","size":33936}
+{"id":"artifact.neuralapi","type":"SourceArtifact","specimen_id":"spec.main","path":"js/interface/neuralapi.js","blob_sha":"40c680d544858aafa3f3502c601647cc31947e25","size":25877}
+{"id":"artifact.drop","type":"SourceArtifact","specimen_id":"spec.main","path":"js/interface/handledrop.js","blob_sha":"5daa17402218abf060508ca6e31529bc158e03dd","size":14379}
+{"id":"artifact.ainode","type":"SourceArtifact","specimen_id":"spec.main","path":"js/nodes/nodetypes/ainodes/ainode.js","blob_sha":"481b61385c4ebce28698ed142cb77145fd9d330d","size":25521}
+{"id":"artifact.aimsg","type":"SourceArtifact","specimen_id":"spec.main","path":"js/nodes/nodetypes/ainodes/ainodemessage.js","blob_sha":"689b465abd9ca380911505dd616c76cb39756173","size":33228}
+{"id":"artifact.link","type":"SourceArtifact","specimen_id":"spec.main","path":"js/nodes/nodetypes/linknodes/linknode.js","blob_sha":"f320e80ba686792db41e3aeb584d39602a954633","size":9965}
+{"id":"artifact.startservers","type":"SourceArtifact","specimen_id":"spec.main","path":"localhost_servers/start_servers.js","blob_sha":"a4cf5fb97e18809d2a518cf0be0b0885e4eca431","size":3062}
+{"id":"artifact.directaccess","type":"SourceArtifact","specimen_id":"spec.main","path":"localhost_servers/direct-access/direct-access.js","blob_sha":"ca9c40e500e5a26b7ff912e54bfb0338e76151da","size":4085}
+{"id":"artifact.automation","type":"SourceArtifact","specimen_id":"spec.main","path":"localhost_servers/automation/automation.js","blob_sha":"e7f26d817fdec6008db3d3e52e3e5ba8e859a2c2","size":2636}
+{"id":"artifact.webscrape","type":"SourceArtifact","specimen_id":"spec.main","path":"localhost_servers/webscrape/index.js","blob_sha":"4b5a8519c364b3965e19cfdf500d819f8c57bc96","size":8572}
+{"id":"artifact.aiproxy","type":"SourceArtifact","specimen_id":"spec.main","path":"localhost_servers/ai-proxy/ai-proxy.js","blob_sha":"32a711c9bfbcaebb460b60957a3a54dc757d67d8","size":9947}
+{"id":"sub.graph","type":"Subsystem","name":"Legacy graph/spatial core","legacy_or_target":"legacy"}
+{"id":"sub.zettel","type":"Subsystem","name":"Legacy Zettelkasten","legacy_or_target":"legacy"}
+{"id":"sub.persistence","type":"Subsystem","name":"Legacy persistence","legacy_or_target":"legacy"}
+{"id":"sub.ai","type":"Subsystem","name":"Legacy AI/conversation","legacy_or_target":"legacy"}
+{"id":"sub.sidecars","type":"Subsystem","name":"Legacy localhost sidecars","legacy_or_target":"legacy"}
+{"id":"sub.electron","type":"Subsystem","name":"Legacy Electron desktop shell","legacy_or_target":"legacy"}
+{"id":"entity.spatial","type":"EntityKind","name":"SpatialEntity"}
+{"id":"entity.text","type":"EntityKind","name":"TextDocument/SemanticNote"}
+{"id":"entity.ai","type":"EntityKind","name":"ConversationEntity"}
+{"id":"entity.web","type":"EntityKind","name":"WebResourceEntity"}
+{"id":"entity.media","type":"EntityKind","name":"MediaAsset"}
+{"id":"proj.text","type":"Projection","name":"TextProjection","projection_kind":"native candidate"}
+{"id":"proj.browser","type":"Projection","name":"BrowserProjection","projection_kind":"bridged/sandboxed"}
+{"id":"proj.ai","type":"Projection","name":"AiAgentProjection","projection_kind":"native candidate"}
+{"id":"proj.filetree","type":"Projection","name":"FileTreeProjection","projection_kind":"native candidate with gated filesystem"}
+{"id":"proj.media","type":"Projection","name":"MediaProjection","projection_kind":"native candidate"}
+{"id":"rel.visual","type":"RelationshipKind","name":"VisualEdge"}
+{"id":"rel.semantic","type":"RelationshipKind","name":"SemanticReference"}
+{"id":"rel.layout","type":"RelationshipKind","name":"LayoutConstraint"}
+{"id":"rel.runtime","type":"RelationshipKind","name":"RuntimeRelation"}
+{"id":"rel.authority","type":"RelationshipKind","name":"AuthorityRelation"}
+{"id":"behavior.create_text","type":"Behavior","name":"Create text/note entity from canvas","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.move","type":"Behavior","name":"Move selected nodes by dynamics impulse","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.scale","type":"Behavior","name":"Scale selected nodes around centroid","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.connect_text","type":"Behavior","name":"Connect text nodes via Zettelkasten references","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.connect_nontext","type":"Behavior","name":"Connect non-text nodes with physical edge","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.direction","type":"Behavior","name":"Toggle edge direction and text semantic references","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.delete","type":"Behavior","name":"Delete node/entity and reconcile text semantics","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.save","type":"Behavior","name":"Save workspace graph and blobs","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.load","type":"Behavior","name":"Load/reconstruct saved workspace","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.python","type":"Behavior","name":"Execute Python from text-node code fences","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.webcode","type":"Behavior","name":"Execute bundled HTML/CSS/JavaScript","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.ai_infer","type":"Behavior","name":"Assemble AI context and run model inference","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.ai_mutate","type":"Behavior","name":"AI message loop mutates notes/relationships","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.browse","type":"Behavior","name":"Navigate/render web resource","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"behavior.fs_read","type":"Behavior","name":"Enumerate/read host filesystem through DirectAccess","source_status":"SOURCE-CLOSED","runtime_status":"OPEN","golden_status":"OPEN"}
+{"id":"state.workspace","type":"State","name":"Legacy serialized graph/workspace data","state_domain":"WorkspaceState","durability":"LocalForage graph-data","authority":"local workspace","regenerability":"not generally regenerable"}
+{"id":"state.blobs","type":"State","name":"Legacy workspace blobs","state_domain":"ExternalBlobState","durability":"LocalForage blob-data","authority":"workspace-owned content","regenerability":"not generally regenerable"}
+{"id":"state.preferences","type":"State","name":"Legacy settings/UI preferences","state_domain":"UserPreferenceState","durability":"LocalForage/localStorage","authority":"user preference","regenerability":"mostly defaults"}
+{"id":"state.credentials","type":"State","name":"Legacy provider credentials","state_domain":"CredentialReferenceState target / raw LocalStorage legacy","durability":"localStorage","authority":"secret material","regenerability":"external credential source"}
+{"id":"state.account_cache","type":"State","name":"Legacy remote-account cache","state_domain":"SessionCache","durability":"localStorage","authority":"non-authoritative cache","regenerability":"remote backend"}
+{"id":"effect.fs_read","type":"ExternalEffect","name":"Ambient host filesystem read","reversibility":"observational but confidentiality impact irreversible","auditability":"weak"}
+{"id":"effect.dynamic_install","type":"ExternalEffect","name":"Dynamic npm install/module execution","reversibility":"not guaranteed","auditability":"weak"}
+{"id":"effect.browser_automation","type":"ExternalEffect","name":"Browser automation/screenshot capture","reversibility":"observational","auditability":"weak"}
+{"id":"effect.js_execute","type":"ExternalEffect","name":"Arbitrary JavaScript execution","reversibility":"arbitrary","auditability":"partial history only"}
+{"id":"effect.python_execute","type":"ExternalEffect","name":"Python/Pyodide execution and package loading","reversibility":"arbitrary","auditability":"weak"}
+{"id":"effect.network_fetch","type":"ExternalEffect","name":"Outbound web/provider network request","reversibility":"disclosure/request side effects not generally reversible","auditability":"weak"}
+{"id":"effect.model_manage","type":"ExternalEffect","name":"Ollama model install/delete/create/push/blob mutation","reversibility":"mixed/destructive","auditability":"weak"}
+{"id":"effect.remote_account","type":"ExternalEffect","name":"Remote account/payment mutation","reversibility":"mixed/destructive","auditability":"server unknown"}
+{"id":"service.directaccess","type":"Service","name":"DirectAccess","service_kind":"localhost sidecar"}
+{"id":"service.automation","type":"Service","name":"Automation","service_kind":"Playwright localhost sidecar"}
+{"id":"service.webscrape","type":"Service","name":"WebScrape","service_kind":"localhost sidecar + SQLite"}
+{"id":"service.aiproxy","type":"Service","name":"AIProxy","service_kind":"localhost provider proxy/model manager"}
+{"id":"service.wiki","type":"Service","name":"WikiSearch","service_kind":"localhost external-provider adapter"}
+{"id":"service.wolfram","type":"Service","name":"WolframAlpha","service_kind":"localhost external-provider adapter"}
+{"id":"cap.fs_read","type":"Capability","name":"FilesystemRead","risk_class":"privileged local data access"}
+{"id":"cap.fs_enum","type":"Capability","name":"FilesystemEnumerate","risk_class":"privileged local data access"}
+{"id":"cap.network","type":"Capability","name":"NetworkFetch","risk_class":"external disclosure/effect"}
+{"id":"cap.browser","type":"Capability","name":"BrowserNavigate","risk_class":"external content/network"}
+{"id":"cap.browser_auto","type":"Capability","name":"BrowserAutomation","risk_class":"privileged interaction/observation"}
+{"id":"cap.python","type":"Capability","name":"PythonExecute","risk_class":"code execution"}
+{"id":"cap.webcode","type":"Capability","name":"WebCodeExecute","risk_class":"code execution"}
+{"id":"cap.js","type":"Capability","name":"JavaScriptExecute","risk_class":"code execution"}
+{"id":"cap.model_infer","type":"Capability","name":"ModelInfer","risk_class":"data disclosure/compute"}
+{"id":"cap.model_manage","type":"Capability","name":"ModelManagement","risk_class":"local/remote mutable runtime"}
+{"id":"cap.workspace_mutate","type":"Capability","name":"WorkspaceEntityMutate","risk_class":"durable local mutation"}
+{"id":"cap.relationship_mutate","type":"Capability","name":"WorkspaceRelationshipMutate","risk_class":"durable semantic mutation"}
+{"id":"contract.scene","type":"Contract","name":"Scene","status":"SOURCE-DERIVED","treatment":"K/R"}
+{"id":"contract.entity","type":"Contract","name":"SpatialEntity","status":"SOURCE-DERIVED","treatment":"K/R"}
+{"id":"contract.workspace","type":"Contract","name":"Workspace","status":"SOURCE-DERIVED","treatment":"K/R"}
+{"id":"contract.projection","type":"Contract","name":"Projection","status":"SOURCE-DERIVED","treatment":"K/R"}
+{"id":"contract.view","type":"Contract","name":"View","status":"SOURCE-DERIVED","treatment":"K/R"}
+{"id":"contract.command","type":"Contract","name":"Command","status":"SOURCE-DERIVED","treatment":"K"}
+{"id":"contract.event","type":"Contract","name":"Event","status":"SOURCE-DERIVED","treatment":"K"}
+{"id":"contract.localstate","type":"Contract","name":"LocalState","status":"SOURCE-DERIVED","treatment":"K/R"}
+{"id":"contract.capability","type":"Contract","name":"Capability","status":"SOURCE-DERIVED","treatment":"K"}
+{"id":"contract.plugin","type":"Contract","name":"Plugin","status":"SOURCE-DERIVED","treatment":"K"}
+{"id":"contract.media","type":"Contract","name":"MediaSource","status":"SOURCE-DERIVED","treatment":"K/R"}
+{"id":"contract.model","type":"Contract","name":"ModelProvider","status":"SOURCE-DERIVED","treatment":"K/R+B"}
+{"id":"contract.relationship","type":"Contract","name":"Relationship","status":"SOURCE-DERIVED","treatment":"K/R"}
+{"id":"contract.snapshot","type":"Contract","name":"Snapshot","status":"SOURCE-DERIVED","treatment":"K/R"}
+{"id":"contract.reconcile","type":"Contract","name":"Reconciliation","status":"SOURCE-DERIVED","treatment":"K"}
+{"id":"contract.runtime","type":"Contract","name":"RuntimeBinding","status":"SOURCE-DERIVED","treatment":"K"}
+{"id":"contract.action","type":"Contract","name":"ActionDescriptor","status":"SOURCE-DERIVED","treatment":"K/R"}
+{"id":"contract.fixture","type":"Contract","name":"BehaviorFixture","status":"SOURCE-DERIVED","treatment":"K"}
+{"id":"fixture.fresh","type":"Fixture","name":"Fresh-profile baseline","status":"OPEN"}
+{"id":"fixture.existing","type":"Fixture","name":"Existing-workspace baseline","status":"OPEN"}
+{"id":"fixture.offline","type":"Fixture","name":"Offline baseline","status":"OPEN"}
+{"id":"fixture.missing_service","type":"Fixture","name":"Missing-service matrix","status":"OPEN"}
+{"id":"fixture.local_ai","type":"Fixture","name":"Local-AI baseline","status":"OPEN"}
+{"id":"fixture.cloud_ai","type":"Fixture","name":"Cloud-AI baseline","status":"OPEN"}
+{"id":"rust.core","type":"RustSubsystem","name":"neurite-core"}
+{"id":"rust.scene","type":"RustSubsystem","name":"neurite-scene"}
+{"id":"rust.render","type":"RustSubsystem","name":"neurite-render"}
+{"id":"rust.workspace","type":"RustSubsystem","name":"neurite-workspace"}
+{"id":"rust.store","type":"RustSubsystem","name":"neurite-store"}
+{"id":"rust.zettel","type":"RustSubsystem","name":"neurite-zettel"}
+{"id":"rust.capability","type":"RustSubsystem","name":"neurite-capability"}
+{"id":"rust.sandbox","type":"RustSubsystem","name":"neurite-sandbox"}
+{"id":"rust.ai","type":"RustSubsystem","name":"neurite-ai"}
+{"id":"rust.events","type":"RustSubsystem","name":"neurite-events"}
+{"id":"runtime.browser","type":"RuntimeBindingKind","name":"BrowserRuntime"}
+{"id":"runtime.python","type":"RuntimeBindingKind","name":"PythonEnvironment"}
+{"id":"runtime.process","type":"RuntimeBindingKind","name":"IsolatedProcess"}
+{"id":"runtime.native","type":"RuntimeBindingKind","name":"NativeRust"}
+{"id":"runtime.wasm","type":"RuntimeBindingKind","name":"WASM/WASI"}
