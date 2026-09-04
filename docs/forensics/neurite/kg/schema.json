@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.1.1",
   "purpose": "Evidence-backed reverse-engineering graph for the frozen Neurite specimens and their native migration.",
   "node_types": {
     "Repository": ["id", "name", "url"],
@@ -9,6 +9,7 @@
     "Symbol": ["id", "name", "symbol_kind", "artifact_id"],
     "Interaction": ["id", "name"],
     "Behavior": ["id", "name", "source_status", "runtime_status", "golden_status"],
+    "Command": ["id", "name", "consequence_class"],
     "State": ["id", "name", "state_domain", "durability", "authority", "regenerability"],
     "Projection": ["id", "name", "projection_kind"],
     "EntityKind": ["id", "name"],
@@ -21,6 +22,7 @@
     "RuntimeBindingKind": ["id", "name"],
     "Fixture": ["id", "name", "status"],
     "Evidence": ["id", "evidence_type", "confidence", "observation"],
+    "Assertion": ["id", "statement", "status"],
     "FailureMode": ["id", "name", "status"],
     "RustSubsystem": ["id", "name"]
   },
@@ -37,18 +39,19 @@
     "TRIGGERS": {"from": ["Interaction", "Behavior", "Command"], "to": ["Behavior", "ExternalEffect"]},
     "RENDERS": {"from": ["Behavior", "EntityKind"], "to": ["Projection"]},
     "DEPENDS_ON": {"from": ["Behavior", "Subsystem", "Projection", "Service"], "to": ["Service", "API", "Capability", "RuntimeBindingKind", "Subsystem"]},
-    "REQUIRES": {"from": ["Behavior", "ExternalEffect", "Projection"], "to": ["Capability"]},
+    "REQUIRES": {"from": ["Behavior", "ExternalEffect", "Projection", "Command"], "to": ["Capability"]},
     "HAS_AUTHORITY": {"from": ["Service", "RuntimeBindingKind"], "to": ["Capability"]},
-    "PRODUCES_EFFECT": {"from": ["Behavior", "Service"], "to": ["ExternalEffect"]},
+    "PRODUCES_EFFECT": {"from": ["Behavior", "Service", "Command"], "to": ["ExternalEffect"]},
     "HAS_PROJECTION": {"from": ["EntityKind"], "to": ["Projection"]},
     "USES_RELATIONSHIP": {"from": ["Behavior", "Contract"], "to": ["RelationshipKind"]},
-    "MAPS_TO_CONTRACT": {"from": ["Behavior", "Subsystem", "EntityKind", "Projection"], "to": ["Contract"]},
+    "MAPS_TO_CONTRACT": {"from": ["Behavior", "Subsystem", "EntityKind", "Projection", "Command"], "to": ["Contract"]},
     "TARGETS_SUBSYSTEM": {"from": ["Contract"], "to": ["RustSubsystem"]},
-    "EVIDENCED_BY": {"from": ["Behavior", "State", "ExternalEffect", "Contract", "EdgeAssertion"], "to": ["Evidence"]},
+    "EVIDENCED_BY": {"from": ["Behavior", "State", "ExternalEffect", "Contract", "Assertion", "Command"], "to": ["Evidence"]},
     "EVIDENCE_SOURCE": {"from": ["Evidence"], "to": ["SourceArtifact", "Fixture", "Specimen"]},
-    "VERIFIED_BY": {"from": ["Behavior", "Contract"], "to": ["Fixture"]},
+    "SUPPORTS": {"from": ["Evidence"], "to": ["Assertion"]},
+    "VERIFIED_BY": {"from": ["Behavior", "Contract", "Assertion"], "to": ["Fixture"]},
     "HAS_FAILURE_MODE": {"from": ["Behavior", "Service", "Projection"], "to": ["FailureMode"]},
-    "RUNS_ON": {"from": ["Behavior", "Projection", "Service"], "to": ["RuntimeBindingKind"]},
+    "RUNS_ON": {"from": ["Behavior", "Projection", "Service", "Command"], "to": ["RuntimeBindingKind"]},
     "SUPERSEDES": {"from": ["Contract", "RustSubsystem"], "to": ["Behavior", "Subsystem"]}
   },
   "evidence_types": [
