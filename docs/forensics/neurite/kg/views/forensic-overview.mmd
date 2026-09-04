@@ -1,0 +1,164 @@
+flowchart LR
+
+  subgraph SPECIMENS["Frozen specimens"]
+    MAIN["main\ne62b2704...\nSOURCE"]
+    ELEC["electron\nab38b3f8...\nSOURCE"]
+  end
+
+  subgraph INTERACTIONS["Representative legacy interactions"]
+    I_CREATE["Create note"]
+    I_MOVE["Move / scale"]
+    I_CONNECT["Connect / direct / disconnect"]
+    I_SAVE["Save / load"]
+    I_CODE["Run code"]
+    I_AI["Send AI message"]
+    I_FILE["Browse files"]
+    I_WEB["Browse / extract web"]
+  end
+
+  subgraph BEHAVIORS["Source-characterized behaviors"]
+    B_CREATE["CreateTextEntity\nSOURCE-CLOSED"]
+    B_MOVE["Spatial dynamics\nSOURCE-CLOSED"]
+    B_CONNECT["Relationship mutation\nSOURCE-CLOSED"]
+    B_SAVE["Workspace persistence\nSOURCE-CLOSED"]
+    B_CODE["Python / Web code execution\nSOURCE-CLOSED"]
+    B_AI["Inference + AI-directed mutation\nSOURCE-CLOSED"]
+    B_FILE["Filesystem enumerate/read\nSOURCE-CLOSED"]
+    B_WEB["Browser / network retrieval\nSOURCE-CLOSED"]
+  end
+
+  subgraph RELS["Relationship kinds"]
+    R_VIS["VisualEdge"]
+    R_SEM["SemanticReference"]
+    R_LAYOUT["LayoutConstraint"]
+    R_RUN["RuntimeRelation"]
+    R_AUTH["AuthorityRelation"]
+  end
+
+  subgraph STATE["State domains"]
+    S_WORK["WorkspaceState"]
+    S_BLOB["ExternalBlobState"]
+    S_PREF["UserPreferenceState"]
+    S_CRED["CredentialReferenceState"]
+    S_CACHE["SessionCache"]
+  end
+
+  subgraph EFFECTS["Privileged effects"]
+    E_FS["Host filesystem read"]
+    E_NET["Network / provider disclosure"]
+    E_CODE["Code execution"]
+    E_MODEL["Model install/delete/push"]
+    E_ACCT["Remote account/payment mutation"]
+    E_INSTALL["Dynamic package/runtime install"]
+  end
+
+  subgraph CAPS["Target capabilities"]
+    C_FS["FilesystemRead / Enumerate"]
+    C_NET["NetworkFetch / BrowserNavigate"]
+    C_CODE["PythonExecute / WebCodeExecute / JSExecute"]
+    C_MODEL["ModelInfer + granular ModelManagement"]
+    C_MUT["WorkspaceEntity/RelationshipMutate"]
+  end
+
+  subgraph CONTRACTS["Technology-neutral contracts"]
+    K_SCENE["Scene / SpatialEntity"]
+    K_WORK["Workspace / Snapshot"]
+    K_REL["Relationship"]
+    K_CMD["ActionDescriptor / Command / Event"]
+    K_CAP["Capability"]
+    K_RUNTIME["RuntimeBinding"]
+    K_MODEL["ModelProvider"]
+    K_PROJ["Projection / View / MediaSource"]
+  end
+
+  subgraph RUST["Native Rust targets"]
+    T_SCENE["neurite-scene / render"]
+    T_WORK["neurite-workspace / store"]
+    T_EVENTS["neurite-events / core"]
+    T_CAP["neurite-capability"]
+    T_SANDBOX["neurite-sandbox"]
+    T_AI["neurite-ai"]
+  end
+
+  subgraph OPEN["Runtime / golden evidence still OPEN"]
+    F_FRESH["Fresh profile"]
+    F_EXIST["Existing workspace"]
+    F_OFF["Offline"]
+    F_MISS["Missing services"]
+    F_LOCAL["Local AI"]
+    F_CLOUD["Cloud AI"]
+    F_FAIL["Failure injection"]
+    F_DIFF["Legacy ⇄ Rust differential fixtures"]
+  end
+
+  MAIN --> I_CREATE
+  MAIN --> I_MOVE
+  MAIN --> I_CONNECT
+  MAIN --> I_SAVE
+  MAIN --> I_CODE
+  MAIN --> I_AI
+  MAIN --> I_FILE
+  MAIN --> I_WEB
+  ELEC --> E_INSTALL
+  ELEC --> E_NET
+
+  I_CREATE --> B_CREATE
+  I_MOVE --> B_MOVE
+  I_CONNECT --> B_CONNECT
+  I_SAVE --> B_SAVE
+  I_CODE --> B_CODE
+  I_AI --> B_AI
+  I_FILE --> B_FILE
+  I_WEB --> B_WEB
+
+  B_CREATE --> S_WORK
+  B_CONNECT --> R_VIS
+  B_CONNECT --> R_SEM
+  B_CONNECT --> R_LAYOUT
+  B_SAVE --> S_WORK
+  B_SAVE --> S_BLOB
+  B_CODE --> E_CODE
+  B_AI --> E_NET
+  B_AI --> C_MUT
+  B_FILE --> E_FS
+  B_WEB --> E_NET
+
+  E_FS --> C_FS
+  E_NET --> C_NET
+  E_CODE --> C_CODE
+  E_MODEL --> C_MODEL
+  E_ACCT --> K_CAP
+  E_INSTALL --> K_RUNTIME
+
+  B_CREATE --> K_SCENE
+  B_MOVE --> K_SCENE
+  B_CONNECT --> K_REL
+  B_SAVE --> K_WORK
+  B_CODE --> K_RUNTIME
+  B_AI --> K_MODEL
+  B_AI --> K_CMD
+  B_FILE --> K_CAP
+  B_WEB --> K_PROJ
+
+  K_SCENE --> T_SCENE
+  K_WORK --> T_WORK
+  K_REL --> T_EVENTS
+  K_CMD --> T_EVENTS
+  K_CAP --> T_CAP
+  K_RUNTIME --> T_SANDBOX
+  K_MODEL --> T_AI
+  K_PROJ --> T_SCENE
+
+  B_CREATE -. "needs runtime proof" .-> F_FRESH
+  B_SAVE -. "needs persistence proof" .-> F_EXIST
+  B_WEB -. "needs degradation proof" .-> F_OFF
+  B_FILE -. "needs missing-sidecar proof" .-> F_MISS
+  B_AI -. "needs local provider proof" .-> F_LOCAL
+  B_AI -. "needs cloud provider proof" .-> F_CLOUD
+  B_CODE -. "needs isolation/failure proof" .-> F_FAIL
+  T_SCENE -. "promotion requires" .-> F_DIFF
+  T_WORK -. "promotion requires" .-> F_DIFF
+  T_EVENTS -. "promotion requires" .-> F_DIFF
+  T_CAP -. "promotion requires" .-> F_DIFF
+  T_SANDBOX -. "promotion requires" .-> F_DIFF
+  T_AI -. "promotion requires" .-> F_DIFF
