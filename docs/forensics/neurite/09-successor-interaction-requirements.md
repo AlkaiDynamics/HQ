@@ -153,3 +153,79 @@ powerful capability
 ```
 
 The successor should feel like a system that teaches the user what can be done while they use it, rather than requiring prior knowledge of hidden gestures.
+
+## 10. Primary experiential target: dynamic neural knowledge environment
+
+The long-term primary experience should feel less like an application and more like a **dynamic, interactive neural knowledge environment with continuous AI conversation**.
+
+Requirements:
+
+- A 3D-capable knowledge graph / spatial cognition view should be supported as a first-class projection, alongside 2D modes.
+- Nodes may represent knowledge, people, projects, repositories, files, agents, workflows, tools, media, decisions, goals, events, or other system entities.
+- Relationships should be visually legible and semantically typed.
+- The scene should be able to expand, collapse, cluster, filter, focus, and re-project without changing underlying authoritative state.
+- AI conversation should be spatially contextual: the user should be able to point at, select, look at, mention, or otherwise indicate an object and speak naturally about it.
+- Agent outputs should be able to appear as graph changes, annotations, proposed workflows, generated artifacts, highlighted relationships, or other visible mutations rather than only chat messages.
+- The interface should support smooth movement between broad situational awareness and focused work.
+
+The target experience is approximately:
+
+```text
+see / hear / point / select / speak
+→ system resolves context
+→ agent reasons over relevant graph + state
+→ proposes or performs allowed action
+→ result appears in the shared environment
+→ user can inspect, approve, redirect, or continue naturally
+```
+
+## 11. Ambient and wearable interaction
+
+The desktop and phone are transitional clients, not the assumed final interaction model.
+
+The architecture must accommodate a future in which the user frequently interacts through ambient/wearable devices such as:
+
+- smart glasses;
+- earbuds/headsets;
+- small voice-first companion devices;
+- watches or other glanceable approval surfaces;
+- future spatial-computing interfaces.
+
+Requirements:
+
+- Conversation and command semantics must not be coupled to a desktop window.
+- Core interaction intents must be representable independently of mouse/keyboard UI events.
+- Voice-first interaction must support conversational continuity, object reference, follow-up, interruption, correction, confirmation, and resumption.
+- Visual clients should be optional projections of the same underlying session/context where feasible.
+- The system should support concise spoken summaries and progressive drill-down rather than requiring visual inspection for every decision.
+- Approval requests should be deliverable through minimal surfaces with enough context to make a safe decision.
+- A wearable client must be able to hand off seamlessly to phone, tablet, desktop, whiteboard, or spatial view without losing task/session context.
+- Important tasks should remain operable when no rich visual surface is currently available.
+
+Design target: over time, routine operation should require progressively less direct interaction with a phone or computer.
+
+## 12. Human participation is structural, not incidental
+
+The user intends to remain **human in the loop, for the loop, and of the loop**. This is a system-design requirement, not merely a UI preference.
+
+The successor should distinguish several forms of human participation:
+
+### Human in the loop
+The user can approve, reject, amend, redirect, pause, stop, or take over consequential actions.
+
+### Human for the loop
+The system should optimize automation around the user's goals, constraints, preferences, judgment, attention, and desired outcomes rather than treating autonomy as an end in itself.
+
+### Human of the loop
+The user is part of the operating system's ongoing state and feedback structure: observations, decisions, corrections, preferences, priorities, exceptions, and judgments become explicit inputs into future behavior and adaptation.
+
+Requirements:
+
+- Human intervention points must be explicit and inspectable.
+- The user should be able to set delegation boundaries by capability, context, risk, project, agent, or workflow.
+- The system should learn from user corrections without silently expanding authority.
+- Low-risk reversible work may become increasingly autonomous; high-impact or ambiguous actions should remain appropriately reviewable.
+- The user must retain the ability to inspect why an action happened, what information informed it, what changed, and what can be reversed.
+- The interface should minimize unnecessary approval fatigue while preserving meaningful control.
+
+The goal is not maximum autonomy. The goal is **maximum useful leverage while preserving human agency, judgment, and continuity of intent**.
