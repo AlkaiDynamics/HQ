@@ -1,0 +1,12 @@
+[package]
+name = "neurite-control"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+neurite-core = { path = "../neurite-core" }
+neurite-events = { path = "../neurite-events" }
+neurite-protocol = { path = "../neurite-protocol" }
+
+[lints]
+workspace = true

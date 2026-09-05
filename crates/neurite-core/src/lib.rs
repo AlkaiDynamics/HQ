@@ -1,57 +1,54 @@
 #![forbid(unsafe_code)]
 
-use std::sync::atomic::{AtomicU64, Ordering};
-
-static NEXT_ID: AtomicU64 = AtomicU64::new(1);
-
-fn next_id() -> u64 {
-    NEXT_ID.fetch_add(1, Ordering::Relaxed)
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct EntityId(pub u64);
+pub struct IdNamespace(u64);
 
-impl EntityId {
-    pub fn new() -> Self {
-        Self(next_id())
+impl IdNamespace {
+    pub const fn new(value: u64) -> Self {
+        Self(value)
+    }
+
+    pub const fn as_u64(self) -> u64 {
+        self.0
     }
 }
 
-impl Default for EntityId {
-    fn default() -> Self {
-        Self::new()
-    }
+macro_rules! scoped_id {
+    ($name:ident) => {
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+        pub struct $name(u128);
+
+        impl $name {
+            pub const fn scoped(namespace: IdNamespace, local: u64) -> Self {
+                Self(((namespace.as_u64() as u128) << 64) | local as u128)
+            }
+
+            pub const fn from_u128(value: u128) -> Self {
+                Self(value)
+            }
+
+            pub const fn as_u128(self) -> u128 {
+                self.0
+            }
+
+            pub const fn namespace(self) -> IdNamespace {
+                IdNamespace::new((self.0 >> 64) as u64)
+            }
+
+            pub const fn local(self) -> u64 {
+                self.0 as u64
+            }
+        }
+    };
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct RelationshipId(pub u64);
-
-impl RelationshipId {
-    pub fn new() -> Self {
-        Self(next_id())
-    }
-}
-
-impl Default for RelationshipId {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct ProjectionId(pub u64);
-
-impl ProjectionId {
-    pub fn new() -> Self {
-        Self(next_id())
-    }
-}
-
-impl Default for ProjectionId {
-    fn default() -> Self {
-        Self::new()
-    }
-}
+scoped_id!(EntityId);
+scoped_id!(RelationshipId);
+scoped_id!(ProjectionId);
+scoped_id!(PrincipalId);
+scoped_id!(IntentId);
+scoped_id!(CommandId);
+scoped_id!(EventId);
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vec2 {

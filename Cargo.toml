@@ -2,9 +2,11 @@
 resolver = "2"
 members = [
   "crates/neurite-app",
+  "crates/neurite-control",
   "crates/neurite-core",
   "crates/neurite-scene",
   "crates/neurite-events",
+  "crates/neurite-protocol",
   "crates/neurite-workspace",
 ]
 

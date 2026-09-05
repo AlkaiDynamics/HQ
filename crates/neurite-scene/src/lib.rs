@@ -28,9 +28,9 @@ pub struct SpatialEntity {
 }
 
 impl SpatialEntity {
-    pub fn new(spatial: Option<SpatialState>) -> Self {
+    pub fn new(id: EntityId, spatial: Option<SpatialState>) -> Self {
         Self {
-            id: EntityId::new(),
+            id,
             spatial,
             semantic_entity_ref: None,
             projections: BTreeSet::new(),
@@ -49,9 +49,9 @@ pub struct Relationship {
 }
 
 impl Relationship {
-    pub fn new(a: EntityId, b: EntityId, kind: RelationshipKind) -> Self {
+    pub fn new(id: RelationshipId, a: EntityId, b: EntityId, kind: RelationshipKind) -> Self {
         Self {
-            id: RelationshipId::new(),
+            id,
             a,
             b,
             kind,
@@ -109,8 +109,16 @@ impl Scene {
         let a = relationship.a;
         let b = relationship.b;
         self.relationships.insert(id, relationship);
-        self.entities.get_mut(&a).expect("checked above").relationships.insert(id);
-        self.entities.get_mut(&b).expect("checked above").relationships.insert(id);
+        self.entities
+            .get_mut(&a)
+            .expect("checked above")
+            .relationships
+            .insert(id);
+        self.entities
+            .get_mut(&b)
+            .expect("checked above")
+            .relationships
+            .insert(id);
         Ok(id)
     }
 
@@ -154,23 +162,39 @@ impl Scene {
             self.remove_relationship(relationship_id)?;
         }
 
-        self.entities.remove(&id).ok_or(SceneError::MissingEntity(id))
+        self.entities
+            .remove(&id)
+            .ok_or(SceneError::MissingEntity(id))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use neurite_core::IdNamespace;
+
+    const TEST_NAMESPACE: IdNamespace = IdNamespace::new(1);
 
     #[test]
     fn deleting_entity_removes_incident_relationships_but_not_other_entity() {
         let mut scene = Scene::default();
-        let a = SpatialEntity::new(Some(SpatialState::default()));
-        let b = SpatialEntity::new(Some(SpatialState::default()));
+        let a = SpatialEntity::new(
+            EntityId::scoped(TEST_NAMESPACE, 1),
+            Some(SpatialState::default()),
+        );
+        let b = SpatialEntity::new(
+            EntityId::scoped(TEST_NAMESPACE, 2),
+            Some(SpatialState::default()),
+        );
         let a_id = scene.add_entity(a).unwrap();
         let b_id = scene.add_entity(b).unwrap();
         let rel_id = scene
-            .add_relationship(Relationship::new(a_id, b_id, RelationshipKind::Visual))
+            .add_relationship(Relationship::new(
+                RelationshipId::scoped(TEST_NAMESPACE, 3),
+                a_id,
+                b_id,
+                RelationshipKind::Visual,
+            ))
             .unwrap();
 
         scene.remove_entity(a_id).unwrap();
@@ -183,13 +207,33 @@ mod tests {
     #[test]
     fn semantic_and_visual_relationships_are_distinct_objects() {
         let mut scene = Scene::default();
-        let a_id = scene.add_entity(SpatialEntity::new(None)).unwrap();
-        let b_id = scene.add_entity(SpatialEntity::new(None)).unwrap();
+        let a_id = scene
+            .add_entity(SpatialEntity::new(
+                EntityId::scoped(TEST_NAMESPACE, 4),
+                None,
+            ))
+            .unwrap();
+        let b_id = scene
+            .add_entity(SpatialEntity::new(
+                EntityId::scoped(TEST_NAMESPACE, 5),
+                None,
+            ))
+            .unwrap();
         let visual = scene
-            .add_relationship(Relationship::new(a_id, b_id, RelationshipKind::Visual))
+            .add_relationship(Relationship::new(
+                RelationshipId::scoped(TEST_NAMESPACE, 6),
+                a_id,
+                b_id,
+                RelationshipKind::Visual,
+            ))
             .unwrap();
         let semantic = scene
-            .add_relationship(Relationship::new(a_id, b_id, RelationshipKind::Semantic))
+            .add_relationship(Relationship::new(
+                RelationshipId::scoped(TEST_NAMESPACE, 7),
+                a_id,
+                b_id,
+                RelationshipKind::Semantic,
+            ))
             .unwrap();
 
         assert_ne!(visual, semantic);
