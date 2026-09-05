@@ -1,0 +1,11 @@
+[package]
+name = "neurite-workspace"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+neurite-core = { path = "../neurite-core" }
+neurite-scene = { path = "../neurite-scene" }
+
+[lints]
+workspace = true
