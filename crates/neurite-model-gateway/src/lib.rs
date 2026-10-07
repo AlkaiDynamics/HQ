@@ -486,3 +486,117 @@ impl ProviderAdapter for OpenAiCompatibleAdapter {
             })
     }
 }
+
+
+/// Jev is a decision model, not a text-generation backend. This policy calls
+/// the authenticated loopback `/ask` surface from jev-codex-router and only
+/// reorders candidates. All inference content still goes to the provider.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RouteError {
+    InvalidEndpoint,
+    NoEligibleModels,
+    InvalidDecision,
+    Transport(ProviderError),
+}
+
+pub struct JevAskPolicy {
+    http: HttpJson,
+}
+
+impl JevAskPolicy {
+    /// The Jev local relay must be configured separately and authenticated.
+    /// Use only the loopback HTTP server; do not send its private key to a remote URL.
+    pub fn new(base_url: &str, credential: &str) -> Result<Self, RouteError> {
+        let host_port = base_url
+            .trim_end_matches('/')
+            .strip_prefix("http://")
+            .ok_or(RouteError::InvalidEndpoint)?;
+        let (host, port) = host_port.rsplit_once(':').ok_or(RouteError::InvalidEndpoint)?;
+        if !matches!(host, "localhost" | "127.0.0.1")
+            || port.parse::<u16>().ok().filter(|port| *port > 0).is_none()
+            || credential.trim().is_empty()
+            || credential.chars().any(char::is_control)
+        {
+            return Err(RouteError::InvalidEndpoint);
+        }
+        let http = HttpJson::new(base_url, Some(credential.to_owned()))
+            .map_err(RouteError::Transport)?;
+        Ok(Self { http })
+    }
+
+    /// Submits only a bounded task summary + eligible inventory to Jev.
+    /// Never shares notes, files, conversation contents or credentials as state.
+    /// Invalid decisions and unavailable Jev fail closed rather than silently
+    /// taking an unapproved route. Static routing remains independently usable.
+    pub fn rank(
+        &self,
+        request: &InferenceRequest,
+        task_summary: &str,
+    ) -> Result<InferenceRequest, RouteError> {
+        if request.candidates.len() > 24 || task_summary.trim().is_empty() {
+            return Err(RouteError::InvalidDecision);
+        }
+        let eligible: Vec<(usize, &ModelSpec)> = request
+            .candidates
+            .iter()
+            .enumerate()
+            .filter(|(_, model)| {
+                request
+                    .required_capabilities
+                    .is_subset(&model.capabilities)
+            })
+            .collect();
+        if eligible.is_empty() {
+            return Err(RouteError::NoEligibleModels);
+        }
+        let mut criteria = serde_json::Map::new();
+        for (index, (_, model)) in eligible.iter().enumerate() {
+            criteria.insert(
+                format!("m{index}"),
+                Value::String(format!(
+                    "provider={} model={} explicitly certified capabilities={}",
+                    model.provider.as_str(),
+                    model.model,
+                    model
+                        .capabilities
+                        .iter()
+                        .map(CapabilityId::as_str)
+                        .collect::<Vec<_>>()
+                        .join(",")
+                )),
+            );
+        }
+        let summary: String = task_summary.chars().take(1000).collect();
+        let payload = json!({
+            "state": {"task": summary, "purpose": "HQ model selection"},
+            "questions": {
+                "model": {
+                    "type": "choice",
+                    "instructions": "Choose the most appropriate available model for the current task, considering sufficient capability and cost. Choose exactly one supplied identifier. Do not invent candidates.",
+                    "criteria": criteria
+                }
+            }
+        });
+        let data = self.http.post("/ask", payload).map_err(RouteError::Transport)?;
+        let key = data
+            .pointer("/answers/model/choice")
+            .and_then(Value::as_str)
+            .ok_or(RouteError::InvalidDecision)?;
+        let index = key
+            .strip_prefix('m')
+            .and_then(|value| value.parse::<usize>().ok())
+            .ok_or(RouteError::InvalidDecision)?;
+        // Reject unrecognized forms such as m01, even if the integer is in range.
+        if key != format!("m{index}") {
+            return Err(RouteError::InvalidDecision);
+        }
+        let candidate_index = eligible
+            .get(index)
+            .map(|(index, _)| *index)
+            .ok_or(RouteError::InvalidDecision)?;
+        let mut routed = request.clone();
+        let selected = routed.candidates.remove(candidate_index);
+        routed.candidates.insert(0, selected);
+        Ok(routed)
+    }
+}
