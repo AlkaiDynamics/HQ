@@ -165,7 +165,7 @@ impl ReceiptStore {
         if !valid_run_id(run_id) {
             return Err(ExecutionError::InvalidRunId);
         }
-        let mut file = match File::open(self.complete_path(run_id)) {
+        let file = match File::open(self.complete_path(run_id)) {
             Ok(file) => file,
             Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(None),
             Err(error) => return Err(ExecutionError::Io(error)),
