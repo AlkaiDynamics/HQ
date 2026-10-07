@@ -19,16 +19,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
-      - name: Resolve lockfile for newly added gateway dependencies
-        run: cargo generate-lockfile
-      - name: Print generated lockfile for commit
-        run: |
-          echo HQ_LOCK_BEGIN
-          cat Cargo.lock
-          echo HQ_LOCK_END
+      - name: Check committed lockfile
+        run: cargo metadata --locked --no-deps --format-version 1 > /dev/null
       - name: Format check
         run: cargo fmt --all -- --check
       - name: Tests
-        run: cargo test --workspace
+        run: cargo test --workspace --locked
       - name: Clippy
-        run: cargo clippy --workspace --all-targets -- -D warnings
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
