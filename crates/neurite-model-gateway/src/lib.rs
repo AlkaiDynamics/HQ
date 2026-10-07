@@ -133,7 +133,9 @@ impl ProviderError {
     pub fn retryable(&self) -> bool {
         matches!(
             self.kind,
-            ProviderErrorKind::Transport | ProviderErrorKind::RateLimited | ProviderErrorKind::Server
+            ProviderErrorKind::Transport
+                | ProviderErrorKind::RateLimited
+                | ProviderErrorKind::Server
         )
     }
 }
@@ -204,11 +206,19 @@ impl Gateway {
     /// server failures; never replay a potentially successful tool invocation.
     pub fn infer(&self, request: &InferenceRequest) -> Result<InferenceResult, GatewayError> {
         if request.candidates.is_empty() {
-            return Err(GatewayError::InvalidRequest("at least one candidate is required"));
+            return Err(GatewayError::InvalidRequest(
+                "at least one candidate is required",
+            ));
         }
         if request.messages.is_empty()
-            || !request.messages.iter().any(|message| message.role == MessageRole::User)
-            || request.messages.iter().any(|message| message.content.trim().is_empty())
+            || !request
+                .messages
+                .iter()
+                .any(|message| message.role == MessageRole::User)
+            || request
+                .messages
+                .iter()
+                .any(|message| message.content.trim().is_empty())
         {
             return Err(GatewayError::InvalidRequest(
                 "non-empty messages and at least one user message required",
@@ -320,7 +330,9 @@ impl HttpJson {
     }
 }
 
-fn parse_http_response(response: Result<ureq::Response, ureq::Error>) -> Result<Value, ProviderError> {
+fn parse_http_response(
+    response: Result<ureq::Response, ureq::Error>,
+) -> Result<Value, ProviderError> {
     let response = response.map_err(|error| match error {
         ureq::Error::Status(code, _) => {
             let kind = match code {
@@ -358,7 +370,9 @@ fn message_json(messages: &[ChatMessage]) -> Vec<Value> {
 }
 
 fn text_field<'a>(data: &'a Value, path: &[&str]) -> Option<&'a str> {
-    path.iter().try_fold(data, |value, field| value.get(*field))?.as_str()
+    path.iter()
+        .try_fold(data, |value, field| value.get(*field))?
+        .as_str()
 }
 
 pub struct OllamaAdapter {
@@ -376,19 +390,27 @@ impl OllamaAdapter {
 impl ProviderAdapter for OllamaAdapter {
     fn discover(&self) -> Result<Vec<String>, ProviderError> {
         let data = self.http.get("/api/tags")?;
-        let models = data.get("models").and_then(Value::as_array).ok_or_else(|| {
-            ProviderError::new(ProviderErrorKind::UnsupportedResponse, "missing Ollama models")
-        })?;
+        let models = data
+            .get("models")
+            .and_then(Value::as_array)
+            .ok_or_else(|| {
+                ProviderError::new(
+                    ProviderErrorKind::UnsupportedResponse,
+                    "missing Ollama models",
+                )
+            })?;
         models
             .iter()
             .map(|item| {
                 item.get("name")
                     .and_then(Value::as_str)
                     .map(str::to_owned)
-                    .ok_or_else(|| ProviderError::new(
-                        ProviderErrorKind::UnsupportedResponse,
-                        "Ollama model missing name",
-                    ))
+                    .ok_or_else(|| {
+                        ProviderError::new(
+                            ProviderErrorKind::UnsupportedResponse,
+                            "Ollama model missing name",
+                        )
+                    })
             })
             .collect()
     }
@@ -400,10 +422,12 @@ impl ProviderAdapter for OllamaAdapter {
         )?;
         text_field(&data, &["message", "content"])
             .map(str::to_owned)
-            .ok_or_else(|| ProviderError::new(
-                ProviderErrorKind::UnsupportedResponse,
-                "missing Ollama message.content",
-            ))
+            .ok_or_else(|| {
+                ProviderError::new(
+                    ProviderErrorKind::UnsupportedResponse,
+                    "missing Ollama message.content",
+                )
+            })
     }
 }
 
@@ -434,10 +458,12 @@ impl ProviderAdapter for OpenAiCompatibleAdapter {
                 item.get("id")
                     .and_then(Value::as_str)
                     .map(str::to_owned)
-                    .ok_or_else(|| ProviderError::new(
-                        ProviderErrorKind::UnsupportedResponse,
-                        "model missing id",
-                    ))
+                    .ok_or_else(|| {
+                        ProviderError::new(
+                            ProviderErrorKind::UnsupportedResponse,
+                            "model missing id",
+                        )
+                    })
             })
             .collect()
     }
@@ -452,9 +478,11 @@ impl ProviderAdapter for OpenAiCompatibleAdapter {
             .and_then(|choices| choices.first())
             .and_then(|choice| text_field(choice, &["message", "content"]))
             .map(str::to_owned)
-            .ok_or_else(|| ProviderError::new(
-                ProviderErrorKind::UnsupportedResponse,
-                "missing completion message.content",
-            ))
+            .ok_or_else(|| {
+                ProviderError::new(
+                    ProviderErrorKind::UnsupportedResponse,
+                    "missing completion message.content",
+                )
+            })
     }
 }
