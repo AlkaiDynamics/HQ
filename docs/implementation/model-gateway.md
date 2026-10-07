@@ -1,7 +1,8 @@
 # HQ Model Gateway — First Working Slice
 
-**Status:** Implementation and tests committed on a feature branch. Network inference and
-full CI verification must be evaluated independently; this document is not a success claim.
+**Status:** Rust workspace tests, formatting and Clippy passed in GitHub Actions on
+2026-10-07 (27 passing tests across the workspace). Live inference against a user's
+real model/provider installations remains unverified.
 
 ## Boundaries
 
@@ -33,9 +34,9 @@ full CI verification must be evaluated independently; this document is not a suc
 ## Local smoke test
 
 ```sh
-cargo test --workspace
+cargo test --workspace --locked
 cargo fmt --all -- --check
-cargo clippy --workspace --all-targets -- -D warnings
+cargo clippy --workspace --all-targets --locked -- -D warnings
 
 # Example: local Ollama. Prompt is passed via stdin, not a command-line argument.
 export HQ_PROVIDER=ollama
@@ -60,15 +61,13 @@ automatically enable selection. Tests cover fallback ordering and capability rej
 
 ## Release gates not yet closed
 
-1. Cargo lockfile updated with resolved external dependencies.
-2. Build, format, clippy, and all workspace tests run in a Rust environment.
-3. Actual Ollama inference observed against the user's local installation.
-4. Actual OpenAI-compatible inference observed against a separate configured endpoint.
-5. Inject a transient outage and verify fallback with recorded provenance.
-6. Persist provider configuration (without secrets), run receipts and discovered models.
-7. Wire HQ notes/files to context assembly, then run from the native UI.
-8. Extend protocol-level capability metadata and provider-specific models as required.
-9. Integrate Jev as an optional policy component after verifying its current interface.
+1. Actual Ollama inference observed against the user's local installation.
+2. Actual OpenAI-compatible inference observed against a separate configured endpoint.
+3. Inject a transient outage and verify fallback with recorded provenance outside test doubles.
+4. Persist provider configuration (without secrets), run receipts and discovered models.
+5. Wire HQ notes/files to context assembly, then run from the native UI.
+6. Extend protocol-level capability metadata and provider-specific models as required.
+7. Integrate Jev as an optional policy component after verifying its current interface.
 
 **Security:** Only trusted administrators should configure provider URLs or key references.
 Do not let agent-supplied prompts change provider endpoints, secret material, or
