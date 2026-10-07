@@ -21,6 +21,11 @@ jobs:
           components: rustfmt, clippy
       - name: Resolve lockfile for newly added gateway dependencies
         run: cargo generate-lockfile
+      - name: Print generated lockfile for commit
+        run: |
+          echo HQ_LOCK_BEGIN
+          cat Cargo.lock
+          echo HQ_LOCK_END
       - name: Format check
         run: cargo fmt --all -- --check
       - name: Tests
