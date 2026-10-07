@@ -1,13 +1,16 @@
 name: Native Rust gateway checks
 
+# Only the PR event triggers automatic validation; do not run the same
+# matrix from both push and pull_request for one feature-branch commit.
 on:
-  push:
-    branches:
-      - feat/provider-neutral-model-gateway
   pull_request:
     branches:
       - impl/neurite-native-kernel
   workflow_dispatch:
+
+concurrency:
+  group: gateway-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:

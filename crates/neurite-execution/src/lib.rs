@@ -69,6 +69,7 @@ pub enum ExecutionError {
     MissingSource(String),
     ContextTooLarge,
     AlreadyExists,
+    PendingRun,
     Io(io::Error),
     InvalidReceipt,
     Inference(GatewayError),
@@ -143,6 +144,13 @@ impl ContextBundle {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ReceiptStatus {
+    Missing,
+    Pending,
+    Complete,
+}
+
 #[derive(Debug, Clone)]
 pub struct ReceiptStore {
     root: PathBuf,
@@ -161,13 +169,34 @@ impl ReceiptStore {
         self.root.join(format!("{run_id}.pending"))
     }
 
+    /// Pending claims may still be executing or may survive a process crash.
+    /// Never replay automatically: inference could already have completed.
+    pub fn status(&self, run_id: &str) -> Result<ReceiptStatus, ExecutionError> {
+        if !valid_run_id(run_id) {
+            return Err(ExecutionError::InvalidRunId);
+        }
+        if self.complete_path(run_id).exists() {
+            return Ok(ReceiptStatus::Complete);
+        }
+        if self.pending_path(run_id).exists() {
+            return Ok(ReceiptStatus::Pending);
+        }
+        Ok(ReceiptStatus::Missing)
+    }
+
     pub fn read(&self, run_id: &str) -> Result<Option<Value>, ExecutionError> {
         if !valid_run_id(run_id) {
             return Err(ExecutionError::InvalidRunId);
         }
         let file = match File::open(self.complete_path(run_id)) {
             Ok(file) => file,
-            Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(None),
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                return match self.status(run_id)? {
+                    ReceiptStatus::Pending => Err(ExecutionError::PendingRun),
+                    ReceiptStatus::Missing => Ok(None),
+                    ReceiptStatus::Complete => Err(ExecutionError::Io(error)),
+                };
+            }
             Err(error) => return Err(ExecutionError::Io(error)),
         };
         let mut bytes = Vec::new();

@@ -73,3 +73,21 @@ automatically enable selection. Tests cover fallback ordering and capability rej
 Do not let agent-supplied prompts change provider endpoints, secret material, or
 capability declarations. Production integrations need secret-store references,
 HTTP host restrictions, request cancellation and audit-safe error handling.
+
+## Second integration slice: provider wire fallback and receipt recovery
+
+- `neurite-execution/tests/provider_wire.rs` covers the complete chain
+  (selected workspace note -> Ollama-shaped HTTP 503 -> OpenAI-compatible
+  HTTP response -> selected provider and failed-attempt receipt -> reopen).
+  The test uses **loopback HTTP fixtures**: real request/response handling,
+  not real model inference.
+- `ReceiptStore::status` now distinguishes `Missing`, `Pending`, and
+  `Complete`. A pending claim surviving interruption produces
+  `ExecutionError::PendingRun`, never silently `None`. Recovery is
+  intentionally **manual** until replay safety can be established.
+- CI now runs automatically from the draft PR only, with concurrency
+  cancellation for superseded runs; standalone manual workflow dispatch
+  remains available. This avoids duplicate push/PR runs for one commit.
+- This does **not** confirm two live configured providers, prompt redaction
+  through Jev, native 2D/3D UI integration, or transaction-safe workspace
+  persistence. These remain release gates.
