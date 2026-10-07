@@ -98,9 +98,8 @@ fn agent_command(execute: bool) -> Result<(), String> {
         return Err("provide a non-empty agent prompt through stdin".into());
     }
 
-    let mut workspace = Workspace::create(
-        env::var("HQ_WORKSPACE_ID").unwrap_or_else(|_| "native-cli".into()),
-    );
+    let mut workspace =
+        Workspace::create(env::var("HQ_WORKSPACE_ID").unwrap_or_else(|_| "native-cli".into()));
     let mut sources = Vec::new();
     if let Ok(note) = env::var("HQ_NOTE_TEXT") {
         let id = EntityId::scoped(IdNamespace::new(1), 1001);
@@ -118,8 +117,7 @@ fn agent_command(execute: bool) -> Result<(), String> {
     let mut gateway = Gateway::new();
     let primary_kind = env::var("HQ_PROVIDER").unwrap_or_else(|_| "ollama".into());
     let primary_model = required_env("HQ_MODEL")?;
-    let primary_url = env::var("HQ_BASE_URL")
-        .unwrap_or_else(|_| default_url(&primary_kind).into());
+    let primary_url = env::var("HQ_BASE_URL").unwrap_or_else(|_| default_url(&primary_kind).into());
     let mut candidates = vec![register_provider(
         &mut gateway,
         "primary",
@@ -131,8 +129,8 @@ fn agent_command(execute: bool) -> Result<(), String> {
 
     if let Ok(other_kind) = env::var("HQ_SECONDARY_PROVIDER") {
         let other_model = required_env("HQ_SECONDARY_MODEL")?;
-        let other_url = env::var("HQ_SECONDARY_BASE_URL")
-            .unwrap_or_else(|_| default_url(&other_kind).into());
+        let other_url =
+            env::var("HQ_SECONDARY_BASE_URL").unwrap_or_else(|_| default_url(&other_kind).into());
         candidates.push(register_provider(
             &mut gateway,
             "secondary",
@@ -148,22 +146,23 @@ fn agent_command(execute: bool) -> Result<(), String> {
     if let Ok(key_path) = env::var("HQ_JEV_KEY_FILE") {
         let key = std::fs::read_to_string(key_path)
             .map_err(|error| format!("cannot read HQ_JEV_KEY_FILE: {error}"))?;
-        let url = env::var("HQ_JEV_URL")
-            .unwrap_or_else(|_| "http://127.0.0.1:4319".into());
+        let url = env::var("HQ_JEV_URL").unwrap_or_else(|_| "http://127.0.0.1:4319".into());
         let policy = JevAskPolicy::new(&url, key.trim())
             .map_err(|error| format!("invalid Jev configuration: {error:?}"))?;
         let ranked = policy
             .rank(
-                &InferenceRequest::new(vec![ChatMessage::user(prompt.clone())], spec.candidates.clone()),
+                &InferenceRequest::new(
+                    vec![ChatMessage::user(prompt.clone())],
+                    spec.candidates.clone(),
+                ),
                 &prompt,
             )
             .map_err(|error| format!("Jev routing rejected: {error:?}"))?;
         spec.candidates = ranked.candidates;
     }
 
-    let receipts = ReceiptStore::new(
-        env::var("HQ_RECEIPTS_DIR").unwrap_or_else(|_| ".hq/receipts".into()),
-    );
+    let receipts =
+        ReceiptStore::new(env::var("HQ_RECEIPTS_DIR").unwrap_or_else(|_| ".hq/receipts".into()));
     let engine = ExecutionEngine::new(&gateway, &receipts);
     if !execute {
         let context = engine
