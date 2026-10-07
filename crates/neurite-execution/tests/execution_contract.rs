@@ -62,9 +62,16 @@ fn preview_is_exact_context_sent_and_excludes_unselected_notes_and_files() {
     let mut workspace = Workspace::create("research");
     workspace.set_note(eid(1), "Selected note A");
     workspace.set_note(eid(2), "Unselected private note");
-    workspace.set_file(eid(3), "quoted.txt", "Selected document B").unwrap();
-    workspace.set_file(eid(4), "private.txt", "Unselected private document").unwrap();
-    let spec = run_spec("run-one", vec![SourceRef::File(eid(3)), SourceRef::Note(eid(1))]);
+    workspace
+        .set_file(eid(3), "quoted.txt", "Selected document B")
+        .unwrap();
+    workspace
+        .set_file(eid(4), "private.txt", "Unselected private document")
+        .unwrap();
+    let spec = run_spec(
+        "run-one",
+        vec![SourceRef::File(eid(3)), SourceRef::Note(eid(1))],
+    );
     let (gateway, calls) = gateway(Ok("Answer A"));
     let root = temp_root();
     let store = ReceiptStore::new(root.clone());
@@ -76,8 +83,13 @@ fn preview_is_exact_context_sent_and_excludes_unselected_notes_and_files() {
     assert!(preview.messages[0].content.contains("Selected document B"));
     assert!(preview.messages[0].content.contains("Selected note A"));
     assert!(!preview.messages[0].content.contains("Unselected private"));
-    assert!(preview.messages[0].content.find("Selected document B").unwrap()
-        < preview.messages[0].content.find("Selected note A").unwrap());
+    assert!(
+        preview.messages[0]
+            .content
+            .find("Selected document B")
+            .unwrap()
+            < preview.messages[0].content.find("Selected note A").unwrap()
+    );
 
     engine.run(&workspace, &spec).unwrap();
     assert_eq!(calls.lock().unwrap()[0], preview.messages);
@@ -91,7 +103,10 @@ fn missing_source_fails_before_inference_or_receipt_creation() {
     let root = temp_root();
     let store = ReceiptStore::new(root.clone());
     let engine = ExecutionEngine::new(&gateway, &store);
-    let result = engine.run(&workspace, &run_spec("missing", vec![SourceRef::Note(eid(5))]));
+    let result = engine.run(
+        &workspace,
+        &run_spec("missing", vec![SourceRef::Note(eid(5))]),
+    );
 
     assert!(matches!(result, Err(ExecutionError::MissingSource(_))));
     assert!(calls.lock().unwrap().is_empty());
@@ -107,7 +122,9 @@ fn receipt_survives_store_reopening_and_captures_selection_and_output() {
     let (gateway, _) = gateway(Ok("persisted answer"));
     let store = ReceiptStore::new(root.clone());
     let spec = run_spec("durable-1", vec![SourceRef::Note(eid(7))]);
-    let receipt = ExecutionEngine::new(&gateway, &store).run(&workspace, &spec).unwrap();
+    let receipt = ExecutionEngine::new(&gateway, &store)
+        .run(&workspace, &spec)
+        .unwrap();
 
     assert_eq!(receipt["status"], "succeeded");
     assert_eq!(receipt["selected"]["provider"], "local");
@@ -141,10 +158,14 @@ fn failed_inference_is_persisted_as_failure_without_losing_workspace() {
     let root = temp_root();
     let store = ReceiptStore::new(root.clone());
     let (gateway, calls) = gateway(Err(ProviderError::new(
-        ProviderErrorKind::Authentication, "bad credentials must not be exposed",
+        ProviderErrorKind::Authentication,
+        "bad credentials must not be exposed",
     )));
     let engine = ExecutionEngine::new(&gateway, &store);
-    let result = engine.run(&workspace, &run_spec("failed", vec![SourceRef::Note(eid(8))]));
+    let result = engine.run(
+        &workspace,
+        &run_spec("failed", vec![SourceRef::Note(eid(8))]),
+    );
 
     assert!(matches!(result, Err(ExecutionError::Inference(_))));
     let saved = store.read("failed").unwrap().unwrap();
@@ -165,7 +186,10 @@ fn oversized_context_and_invalid_receipt_id_fail_closed() {
     let store = ReceiptStore::new(root.clone());
     let engine = ExecutionEngine::new(&gateway, &store);
     let spec = run_spec("too-large", vec![SourceRef::Note(eid(9))]);
-    assert!(matches!(engine.run(&workspace, &spec), Err(ExecutionError::ContextTooLarge)));
+    assert!(matches!(
+        engine.run(&workspace, &spec),
+        Err(ExecutionError::ContextTooLarge)
+    ));
     assert!(matches!(
         engine.run(&workspace, &run_spec("../escape", vec![])),
         Err(ExecutionError::InvalidRunId)
