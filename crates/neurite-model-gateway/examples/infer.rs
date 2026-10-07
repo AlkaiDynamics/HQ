@@ -16,7 +16,8 @@ use std::io::{self, Read};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let provider_kind = env::var("HQ_PROVIDER").unwrap_or_else(|_| "ollama".into());
-    let model = env::var("HQ_MODEL").map_err(|_| "HQ_MODEL must name an installed/accessible model")?;
+    let model =
+        env::var("HQ_MODEL").map_err(|_| "HQ_MODEL must name an installed/accessible model")?;
     let provider = ProtocolId::new(format!("hq.model.provider.{provider_kind}"))
         .map_err(|_| "invalid HQ_PROVIDER identifier")?;
 
@@ -29,13 +30,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut gateway = Gateway::new();
     match provider_kind.as_str() {
         "ollama" => {
-            let root = env::var("HQ_BASE_URL")
-                .unwrap_or_else(|_| "http://127.0.0.1:11434".into());
-            gateway.register(provider.clone(), OllamaAdapter::new(&root).map_err(|error| error.detail)?);
+            let root = env::var("HQ_BASE_URL").unwrap_or_else(|_| "http://127.0.0.1:11434".into());
+            gateway.register(
+                provider.clone(),
+                OllamaAdapter::new(&root).map_err(|error| error.detail)?,
+            );
         }
         "openai" => {
-            let root = env::var("HQ_BASE_URL")
-                .unwrap_or_else(|_| "https://api.openai.com/v1".into());
+            let root =
+                env::var("HQ_BASE_URL").unwrap_or_else(|_| "https://api.openai.com/v1".into());
             gateway.register(
                 provider.clone(),
                 OpenAiCompatibleAdapter::new(&root, env::var("HQ_API_KEY").ok())
@@ -52,6 +55,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ))
         .map_err(|error| format!("model gateway failure: {error:?}"))?;
     println!("{}", result.text);
-    eprintln!("provider={} model={}", result.selected.provider.as_str(), result.selected.model);
+    eprintln!(
+        "provider={} model={}",
+        result.selected.provider.as_str(),
+        result.selected.model
+    );
     Ok(())
 }
