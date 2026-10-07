@@ -270,6 +270,7 @@ version = "0.1.0"
 dependencies = [
  "neurite-core",
  "neurite-model-gateway",
+ "neurite-protocol",
  "neurite-workspace",
  "serde_json",
 ]
