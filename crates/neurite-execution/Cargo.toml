@@ -1,0 +1,13 @@
+[package]
+name = "neurite-execution"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+neurite-core = { path = "../neurite-core" }
+neurite-workspace = { path = "../neurite-workspace" }
+neurite-model-gateway = { path = "../neurite-model-gateway" }
+serde_json = "1"
+
+[lints]
+workspace = true
