@@ -236,6 +236,9 @@ name = "neurite-app"
 version = "0.1.0"
 dependencies = [
 "neurite-core",
+"neurite-execution",
+"neurite-model-gateway",
+"neurite-protocol",
 "neurite-scene",
 "neurite-workspace",
 ]
