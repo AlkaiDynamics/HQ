@@ -1,0 +1,29 @@
+name: Native Rust gateway checks
+
+on:
+  push:
+    branches:
+      - feat/provider-neutral-model-gateway
+  pull_request:
+    branches:
+      - impl/neurite-native-kernel
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Resolve lockfile for newly added gateway dependencies
+        run: cargo generate-lockfile
+      - name: Format check
+        run: cargo fmt --all -- --check
+      - name: Tests
+        run: cargo test --workspace
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
