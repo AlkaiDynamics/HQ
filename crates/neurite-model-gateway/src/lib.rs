@@ -487,7 +487,6 @@ impl ProviderAdapter for OpenAiCompatibleAdapter {
     }
 }
 
-
 /// Jev is a decision model, not a text-generation backend. This policy calls
 /// the authenticated loopback `/ask` surface from jev-codex-router and only
 /// reorders candidates. All inference content still goes to the provider.
@@ -511,7 +510,9 @@ impl JevAskPolicy {
             .trim_end_matches('/')
             .strip_prefix("http://")
             .ok_or(RouteError::InvalidEndpoint)?;
-        let (host, port) = host_port.rsplit_once(':').ok_or(RouteError::InvalidEndpoint)?;
+        let (host, port) = host_port
+            .rsplit_once(':')
+            .ok_or(RouteError::InvalidEndpoint)?;
         if !matches!(host, "localhost" | "127.0.0.1")
             || port.parse::<u16>().ok().filter(|port| *port > 0).is_none()
             || credential.trim().is_empty()
@@ -519,8 +520,8 @@ impl JevAskPolicy {
         {
             return Err(RouteError::InvalidEndpoint);
         }
-        let http = HttpJson::new(base_url, Some(credential.to_owned()))
-            .map_err(RouteError::Transport)?;
+        let http =
+            HttpJson::new(base_url, Some(credential.to_owned())).map_err(RouteError::Transport)?;
         Ok(Self { http })
     }
 
@@ -540,11 +541,7 @@ impl JevAskPolicy {
             .candidates
             .iter()
             .enumerate()
-            .filter(|(_, model)| {
-                request
-                    .required_capabilities
-                    .is_subset(&model.capabilities)
-            })
+            .filter(|(_, model)| request.required_capabilities.is_subset(&model.capabilities))
             .collect();
         if eligible.is_empty() {
             return Err(RouteError::NoEligibleModels);
@@ -577,7 +574,10 @@ impl JevAskPolicy {
                 }
             }
         });
-        let data = self.http.post("/ask", payload).map_err(RouteError::Transport)?;
+        let data = self
+            .http
+            .post("/ask", payload)
+            .map_err(RouteError::Transport)?;
         let key = data
             .pointer("/answers/model/choice")
             .and_then(Value::as_str)
