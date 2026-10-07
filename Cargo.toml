@@ -9,6 +9,7 @@ members = [
   "crates/neurite-protocol",
   "crates/neurite-workspace",
   "crates/neurite-model-gateway",
+  "crates/neurite-execution",
 ]
 
 [workspace.package]
