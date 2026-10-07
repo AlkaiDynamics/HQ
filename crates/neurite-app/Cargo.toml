@@ -7,6 +7,9 @@ edition.workspace = true
 neurite-core = { path = "../neurite-core" }
 neurite-scene = { path = "../neurite-scene" }
 neurite-workspace = { path = "../neurite-workspace" }
+neurite-execution = { path = "../neurite-execution" }
+neurite-model-gateway = { path = "../neurite-model-gateway" }
+neurite-protocol = { path = "../neurite-protocol" }
 
 [lints]
 workspace = true
