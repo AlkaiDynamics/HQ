@@ -1,7 +1,6 @@
 use neurite_model_gateway::{
-    AttemptFailure, ChatMessage, Gateway, GatewayError, InferenceRequest, ModelSpec,
-    OllamaAdapter, OpenAiCompatibleAdapter, ProviderAdapter, ProviderError,
-    ProviderErrorKind,
+    AttemptFailure, ChatMessage, Gateway, GatewayError, InferenceRequest, ModelSpec, OllamaAdapter,
+    OpenAiCompatibleAdapter, ProviderAdapter, ProviderError, ProviderErrorKind,
 };
 use neurite_protocol::{CapabilityId, ProtocolId};
 use std::io::{Read, Write};
@@ -175,18 +174,25 @@ fn mock_http_once(body: &'static str) -> (String, thread::JoinHandle<()>) {
 
 #[test]
 fn ollama_adapter_parses_real_http_chat_response() {
-    let (url, worker) = mock_http_once(r#"{"message":{"role":"assistant","content":"hello from ollama"}}"#);
+    let (url, worker) =
+        mock_http_once(r#"{"message":{"role":"assistant","content":"hello from ollama"}}"#);
     let adapter = OllamaAdapter::new(&url).unwrap();
-    let text = adapter.generate("qwen3:8b", &[ChatMessage::user("hello")]).unwrap();
+    let text = adapter
+        .generate("qwen3:8b", &[ChatMessage::user("hello")])
+        .unwrap();
     worker.join().unwrap();
     assert_eq!(text, "hello from ollama");
 }
 
 #[test]
 fn openai_compatible_adapter_parses_real_http_completion_response() {
-    let (url, worker) = mock_http_once(r#"{"choices":[{"message":{"role":"assistant","content":"hello from openai"}}]}"#);
+    let (url, worker) = mock_http_once(
+        r#"{"choices":[{"message":{"role":"assistant","content":"hello from openai"}}]}"#,
+    );
     let adapter = OpenAiCompatibleAdapter::new(&url, None).unwrap();
-    let text = adapter.generate("gpt-test", &[ChatMessage::user("hello")]).unwrap();
+    let text = adapter
+        .generate("gpt-test", &[ChatMessage::user("hello")])
+        .unwrap();
     worker.join().unwrap();
     assert_eq!(text, "hello from openai");
 }
