@@ -262,6 +262,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "neurite-execution"
+version = "0.1.0"
+dependencies = [
+ "neurite-core",
+ "neurite-model-gateway",
+ "neurite-workspace",
+ "serde_json",
+]
+
+[[package]]
 name = "neurite-model-gateway"
 version = "0.1.0"
 dependencies = [
