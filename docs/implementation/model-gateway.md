@@ -1,0 +1,76 @@
+# HQ Model Gateway — First Working Slice
+
+**Status:** Implementation and tests committed on a feature branch. Network inference and
+full CI verification must be evaluated independently; this document is not a success claim.
+
+## Boundaries
+
+- `neurite-model-gateway` is a Rust workspace crate; neither Ollama nor Jev is a
+  dependency of the HQ kernel, scene, workspace, control, or protocol crates.
+- `Gateway` accepts ordered, explicitly named provider/model candidates,
+  checks trusted capability declarations, and records failures and selection.
+- `ProviderAdapter` is the extensibility contract. The initial adapters are
+  `OllamaAdapter` (`/api/tags`, `/api/chat`) and
+  `OpenAiCompatibleAdapter` (`/models`, `/chat/completions`).
+- OpenAI-compatible servers can include OpenAI, LM Studio, llama.cpp server,
+  and vLLM **only when the deployment actually implements the corresponding
+  Chat Completions endpoints**. Each installation requires its own verification.
+- This slice supports **synchronous, text-only, non-streamed chat**. It does
+  not implement tool calling, media, embeddings, token accounting, provider-side
+  cancellation, retries within a provider, or HTTP streaming. Do not treat
+  the open adapter boundary as evidence that those capabilities work.
+- Native Anthropic and Google/Gemini APIs are **not yet implemented**.
+- Jev is a **future routing-policy adapter**: it may rank or supply the candidate
+  list but must not acquire ownership of HQ's runtime, state, or admission.
+- `discover` returns model names with **empty capability assertions**.
+  Trusted host configuration must explicitly certify capabilities before a
+  requirement-gated route may select a model.
+- Candidate order is caller-supplied, not an automatic quality score.
+  Fallback only follows transport errors, HTTP 408/429, or HTTP 5xx;
+  auth failures, malformed payloads and unsupported responses stop.
+  Tool-effect replay is explicitly outside this slice.
+
+## Local smoke test
+
+```sh
+cargo test --workspace
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+
+# Example: local Ollama. Prompt is passed via stdin, not a command-line argument.
+export HQ_PROVIDER=ollama
+export HQ_MODEL=qwen3:8b
+export HQ_BASE_URL=http://127.0.0.1:11434
+printf 'Give one short sentence.\n' | cargo run -p neurite-model-gateway --example infer
+
+# Example: OpenAI-compatible endpoint. Set HQ_MODEL to a model supported by the endpoint.
+export HQ_PROVIDER=openai
+export HQ_MODEL=your-model-id
+export HQ_BASE_URL=http://127.0.0.1:1234/v1
+printf 'Give one short sentence.\n' | cargo run -p neurite-model-gateway --example infer
+
+# Cloud OpenAI example: use HQ_BASE_URL=https://api.openai.com/v1
+# and HQ_API_KEY from a secret store/environment, never source control.
+```
+
+For a local-vs-cloud switching gate, configure two `ProviderAdapter` registrations,
+supply two `ModelSpec` candidates, then verify selected provider/model and
+`failed_attempts` in the returned `InferenceResult`. Provider discovery does not
+automatically enable selection. Tests cover fallback ordering and capability rejection.
+
+## Release gates not yet closed
+
+1. Cargo lockfile updated with resolved external dependencies.
+2. Build, format, clippy, and all workspace tests run in a Rust environment.
+3. Actual Ollama inference observed against the user's local installation.
+4. Actual OpenAI-compatible inference observed against a separate configured endpoint.
+5. Inject a transient outage and verify fallback with recorded provenance.
+6. Persist provider configuration (without secrets), run receipts and discovered models.
+7. Wire HQ notes/files to context assembly, then run from the native UI.
+8. Extend protocol-level capability metadata and provider-specific models as required.
+9. Integrate Jev as an optional policy component after verifying its current interface.
+
+**Security:** Only trusted administrators should configure provider URLs or key references.
+Do not let agent-supplied prompts change provider endpoints, secret material, or
+capability declarations. Production integrations need secret-store references,
+HTTP host restrictions, request cancellation and audit-safe error handling.
