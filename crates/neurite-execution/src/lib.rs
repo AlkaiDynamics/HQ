@@ -106,11 +106,16 @@ impl ContextBundle {
                     ),
                     SourceRef::File(id) => (
                         "file",
-                        workspace.files.get(id).map(|f| f.name.clone()).unwrap_or_default(),
+                        workspace
+                            .files
+                            .get(id)
+                            .map(|f| f.name.clone())
+                            .unwrap_or_default(),
                         workspace.files.get(id).map(|f| f.content.as_str()),
                     ),
                 };
-                let content = content.ok_or_else(|| ExecutionError::MissingSource(source.label()))?;
+                let content =
+                    content.ok_or_else(|| ExecutionError::MissingSource(source.label()))?;
                 // Use structured markers, not raw path strings from imported sources.
                 text.push_str(&format!(
                     "\n[HQ SOURCE {} kind={} id={} name={:?}]\n{}\n[/HQ SOURCE {}]\n",
@@ -169,7 +174,8 @@ impl ReceiptStore {
         file.take(4 * 1024 * 1024)
             .read_to_end(&mut bytes)
             .map_err(ExecutionError::Io)?;
-        let value: Value = serde_json::from_slice(&bytes).map_err(|_| ExecutionError::InvalidReceipt)?;
+        let value: Value =
+            serde_json::from_slice(&bytes).map_err(|_| ExecutionError::InvalidReceipt)?;
         if value["run_id"] != run_id {
             return Err(ExecutionError::InvalidReceipt);
         }
@@ -206,15 +212,21 @@ impl ReceiptStore {
         if !valid_run_id(run_id) || receipt["run_id"] != run_id {
             return Err(ExecutionError::InvalidReceipt);
         }
-        let payload = serde_json::to_vec_pretty(receipt).map_err(|_| ExecutionError::InvalidReceipt)?;
+        let payload =
+            serde_json::to_vec_pretty(receipt).map_err(|_| ExecutionError::InvalidReceipt)?;
         // Unique temporary file; publish through hard_link (atomic no-clobber).
         let stamp = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map_err(|_| ExecutionError::InvalidReceipt)?
             .as_nanos();
-        let temporary = self.root.join(format!(".{run_id}-{}-{stamp}.tmp", std::process::id()));
+        let temporary = self
+            .root
+            .join(format!(".{run_id}-{}-{stamp}.tmp", std::process::id()));
         let write_result = (|| -> io::Result<()> {
-            let mut file = OpenOptions::new().write(true).create_new(true).open(&temporary)?;
+            let mut file = OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(&temporary)?;
             file.write_all(&payload)?;
             file.sync_all()?;
             fs::hard_link(&temporary, self.complete_path(run_id))?;
@@ -296,7 +308,10 @@ impl<'a> ExecutionEngine<'a> {
     pub fn run(&self, workspace: &Workspace, spec: &RunSpec) -> Result<Value, ExecutionError> {
         let context = self.preview(workspace, spec)?;
         self.receipts.claim(&spec.id)?;
-        let inference = self.gateway.infer(&InferenceRequest::new(context.messages.clone(), spec.candidates.clone()));
+        let inference = self.gateway.infer(&InferenceRequest::new(
+            context.messages.clone(),
+            spec.candidates.clone(),
+        ));
         let sources: Vec<String> = context.source_refs.iter().map(SourceRef::label).collect();
         let receipt = match &inference {
             Ok(result) => json!({
@@ -328,6 +343,8 @@ impl<'a> ExecutionEngine<'a> {
             }
         };
         self.receipts.commit(&spec.id, &receipt)?;
-        inference.map(|_| receipt).map_err(ExecutionError::Inference)
+        inference
+            .map(|_| receipt)
+            .map_err(ExecutionError::Inference)
     }
 }
