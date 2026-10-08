@@ -119,3 +119,40 @@ does not itself disclose sensitive material.
 Unit and CLI integration tests cover rejection of absent, oversized and
 multiline summaries and the offline preview path; no real Jev or model
 service has yet been exercised.
+
+## Current priority: direct live-provider proof
+
+Jev is an optional routing enhancement and **not** a prerequisite for HQ.
+Do not configure `HQ_JEV_KEY_FILE` for the first working agent run. Prove
+workspace notes/files -> a real configured inference provider -> model response
+-> receipt saved and read back before extending Jev or model routing.
+
+A reproducible **Windows PowerShell** smoke procedure for a running local
+OpenAI-compatible server (e.g., LM Studio with its chat endpoint enabled):
+
+```powershell
+# Run these from the HQ repository root, with Rust/Cargo installed.
+Remove-Item Env:HQ_JEV_KEY_FILE -ErrorAction SilentlyContinue
+$env:HQ_PROVIDER = 'openai'
+$env:HQ_BASE_URL = 'http://127.0.0.1:1234/v1'
+$env:HQ_MODEL = 'REPLACE_WITH_ACTUALLY_LOADED_MODEL_ID'
+$env:HQ_NOTE_TEXT = 'HQ live smoke reference note'
+$env:HQ_RUN_ID = 'hq-live-' + [guid]::NewGuid().ToString('N')
+'Using the selected note, reply in exactly one sentence.' |
+    cargo run --locked -p neurite-app -- --agent-preview
+'Using the selected note, reply in exactly one sentence.' |
+    cargo run --locked -p neurite-app -- --agent-run
+Get-Content (Join-Path '.hq/receipts' ($env:HQ_RUN_ID + '.json')) -Raw
+```
+
+Change `HQ_PROVIDER` to `ollama`, `HQ_BASE_URL` to
+`http://127.0.0.1:11434`, and `HQ_MODEL` to an actually loaded Ollama
+model to test that alternative. These commands are **instructions**,
+not evidence that a user's installed provider has responded. Any failed
+run must preserve its failure receipt; do not silently retry with the
+same run ID. If `HQ_JEV_KEY_FILE` is set, the optional Jev policy is
+enabled for `--agent-run`, so remove it for the baseline proof.
+
+The first release acceptance criterion is an observed real provider
+response alongside a readable `succeeded` receipt that names the
+selected provider/model. Do not call that verified based on fixture tests.

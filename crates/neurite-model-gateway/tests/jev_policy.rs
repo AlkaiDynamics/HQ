@@ -121,15 +121,16 @@ fn jev_policy_fails_closed_if_no_model_satisfies_required_capabilities() {
 #[test]
 fn overlong_or_multiline_routing_summary_is_rejected_without_http() {
     let policy = JevAskPolicy::new("http://127.0.0.1:4319", "key").unwrap();
-    let req = InferenceRequest::new(vec![ChatMessage::user("private prompt")], vec![
-        model("local", "test"),
-    ]);
+    let req = InferenceRequest::new(
+        vec![ChatMessage::user("private prompt")],
+        vec![model("local", "test")],
+    );
     assert!(matches!(
         policy.rank(&req, &"X".repeat(1001)),
         Err(RouteError::InvalidDecision)
     ));
     assert!(matches!(
-        policy.rank(&req, "contains\\na second line"),
+        policy.rank(&req, "contains\na second line"),
         Err(RouteError::InvalidDecision)
     ));
 }

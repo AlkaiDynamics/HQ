@@ -63,7 +63,10 @@ fn jev_summary_from_env() -> Result<String, String> {
         || summary.chars().count() > 1000
         || summary.chars().any(char::is_control)
     {
-        return Err("HQ_JEV_TASK_SUMMARY must be non-empty, single-line, and at most 1000 characters".into());
+        return Err(
+            "HQ_JEV_TASK_SUMMARY must be non-empty, single-line, and at most 1000 characters"
+                .into(),
+        );
     }
     Ok(summary)
 }
