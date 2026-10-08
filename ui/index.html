@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>HQ · Native Neurite · Spatial Workbench</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body data-theme="grounded">
+  <div id="app" class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-glyph">◈</span><span>HQ <small>/ NATIVE NEURITE</small></span></div>
+      <div id="breadcrumbs" class="breadcrumbs" aria-label="Workspace breadcrumb">Workspace <span>›</span> Research</div>
+      <div class="global-search"><span aria-hidden="true">⌕</span><input id="global-search" type="search" placeholder="Search nodes, references, actions…" aria-label="Search workspace" /><kbd> / </kbd></div>
+      <div class="view-switch" role="group" aria-label="Canvas lens"><button id="planar-mode" class="active" aria-pressed="true">2D</button><button id="graph-mode" aria-pressed="false">Graph</button><button class="disabled" disabled title="Genuine 3D canvas renderer is not implemented in this slice">3D ↗</button></div>
+      <button id="toggle-panels" class="icon-button" aria-label="Toggle side panels" title="Toggle side panels">◫</button>
+      <div class="profile" title="Local UI fixture · no live provider">HQ</div>
+    </header>
+
+    <nav class="rail" aria-label="HQ navigation">
+      <button class="rail-button active" title="Canvas" aria-label="Canvas">▦</button>
+      <button class="rail-button" id="nav-notes" title="Select note" aria-label="Select note">▤</button>
+      <button class="rail-button" id="nav-agents" title="Select agent" aria-label="Select agent">◉</button>
+      <button class="rail-button" id="nav-worlds" title="Return home" aria-label="Return home">⌂</button>
+      <div class="rail-spacer"></div>
+      <button class="rail-button" id="nav-help" title="Interaction reference" aria-label="Interaction reference">?</button>
+    </nav>
+
+    <aside id="palette" class="palette panel" aria-labelledby="palette-title">
+      <div class="panel-heading"><div><span class="eyebrow">CREATE & COMPOSE</span><h2 id="palette-title">Element palette</h2></div><button class="ghost" id="palette-close" aria-label="Collapse palette">⨯</button></div>
+      <label class="search-field"><span>⌕</span><input id="palette-search" placeholder="Find an element" aria-label="Find element templates" /></label>
+      <div id="family-tabs" class="filter-tabs" role="group" aria-label="Element categories"></div>
+      <div class="palette-caption"><span id="palette-family-caption">CORE ELEMENTS</span><button id="periodic-toggle" class="inline-link" title="Toggle periodic organization">◇ Periodic</button></div>
+      <div id="palette-items" class="palette-grid" aria-live="polite"></div>
+      <div class="palette-extra"><p>Custom elements are compositions, not a fixed catalog.</p><button id="add-custom" class="full subtle-button">+ Blank programmable node</button></div>
+      <div class="reference-label">REFERENCE CONTINUITY</div>
+      <p class="reference-copy">Flowise & n8n • 2D editing<br>Neurite • mixed spatial content<br>QuestN • inspectable choices</p>
+    </aside>
+
+    <main class="stage" id="stage" aria-label="HQ canvas">
+      <div class="stage-toolbar">
+        <div class="stage-identity"><span class="stage-symbol">◎</span><div><strong id="stage-title">Research workspace</strong><small>Spatial authoring · Local UI fixture</small></div></div>
+        <div class="toolbar-actions"><span class="quiet-status"><i></i> No provider connected</span><button id="preview-context" class="subtle-button" title="Preview exactly the selected note/file content">Context preview</button><button id="run-disabled" class="primary-action" title="Native execution is not connected to this UI">▷ Run <span class="button-suffix">↗</span></button></div>
+      </div>
+      <div id="viewport" class="viewport" tabindex="0" aria-label="Pannable and zoomable node canvas">
+        <div id="world" class="world"><svg id="wires" class="wires" aria-hidden="true" width="2800" height="1600" viewBox="0 0 2800 1600"></svg><div id="nodes" class="nodes"></div></div>
+        <div class="canvas-corner top-left"><span id="lens-label">PLANAR LENS</span><span class="thin-sep">·</span><span>drag background to pan</span><span class="thin-sep">·</span><span>wheel to zoom</span></div>
+        <div class="canvas-corner bottom-left"><div class="minimap" id="minimap"><div class="mini-title">WORLD MAP <span id="mini-frame">Root</span></div><svg id="minimap-svg" viewBox="0 0 180 74" aria-label="Miniature node overview"></svg></div><div class="zoom-controls"><button id="zoom-out" aria-label="Zoom out">−</button><span id="zoom-label">84%</span><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-home" title="Reset camera" aria-label="Reset camera">⌂</button></div></div>
+        <div class="canvas-corner bottom-right"><button id="edge-mode" class="subtle-button" title="Click source, then target to create a connection">⇢ Connect</button><button id="export-draft" class="subtle-button" title="Export this nonauthoritative UI draft as JSON">↓ Export draft</button></div>
+      </div>
+      <section id="child-panel" class="child-panel hidden" aria-label="Nested world beside parent"><div class="child-heading"><div><span class="eyebrow">COMPOSITE / NESTED WORLD</span><strong id="child-title">Reasoning agent</strong><small id="child-boundary">Goal • Research data • User context → To tools • To review</small></div><div><button id="child-enter" class="subtle-button">Enter world ↗</button><button id="child-close" class="ghost" aria-label="Close nested graph">✕</button></div></div><div id="child-preview" class="child-preview"></div></section>
+      <div id="quest-ribbon" class="quest-ribbon" aria-label="Selection actions"><span class="eyebrow">QUESTN</span><div id="quest-actions" class="quest-actions"></div></div>
+    </main>
+
+    <aside id="right-panel" class="right-panel panel" aria-label="Contextual workspace tools">
+      <section class="workbench"><div class="panel-heading"><div><span class="eyebrow">RECOGNITION-FIRST TOOLS</span><h2>Prompt workbench</h2></div><button id="tool-help" class="ghost" title="Tools stage proposals; they do not run models">ⓘ</button></div><label class="search-field"><span>⌕</span><input id="action-search" placeholder="Search reasoning actions" aria-label="Search reasoning actions" /></label><div id="prompt-tools" class="prompt-tools"></div><button id="custom-prompt" class="full subtle-button">✧ Custom prompt / skill</button></section>
+      <section class="inspector"><div class="panel-heading separator"><div><span class="eyebrow">CONTEXTUAL EDITING</span><h2>Node inspector</h2></div><span id="selection-count" class="count-tag">No selection</span></div><div id="inspector-content"><div class="empty-inspector"><div class="empty-symbol">◇</div><strong>Choose any object</strong><p>Inspect its content, references, program, context, and nested world without leaving the canvas.</p></div></div></section>
+      <section class="scene-settings"><div class="panel-heading separator"><div><span class="eyebrow">LIFE SPACE / PRESENTATION</span><h2>Scene preferences</h2></div></div><label class="theme-control">Theme <select id="theme-select"><option value="grounded">Grounded dark</option><option value="slate">Slate blue</option><option value="light">Soft daylight</option></select></label><label class="check-row"><input type="checkbox" id="refs-toggle" checked /> Show semantic references</label><p>Styling changes only the view. It does not alter execution or grants.</p></section>
+    </aside>
+  </div>
+  <div id="dialog" class="dialog-backdrop hidden" role="presentation"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog-header"><h2 id="dialog-title">Inspect</h2><button id="dialog-close" aria-label="Close dialog">✕</button></div><div id="dialog-content"></div><button id="dialog-done" class="primary-action">Close</button></div></div>
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

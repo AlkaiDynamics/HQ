@@ -30,3 +30,8 @@ jobs:
         run: cargo test --workspace --locked
       - name: Clippy
         run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: UI model tests
+        run: node --test ui/tests/*.test.mjs
