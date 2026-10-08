@@ -1,0 +1,12 @@
+[package]
+name = "neurite-model-gateway"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+neurite-protocol = { path = "../neurite-protocol" }
+serde_json = "1"
+ureq = { version = "2.12", default-features = true }
+
+[lints]
+workspace = true

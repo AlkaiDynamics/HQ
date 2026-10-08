@@ -1,0 +1,37 @@
+name: Native Rust gateway checks
+
+# Only the PR event triggers automatic validation; do not run the same
+# matrix from both push and pull_request for one feature-branch commit.
+on:
+  pull_request:
+    branches:
+      - impl/neurite-native-kernel
+  workflow_dispatch:
+
+concurrency:
+  group: gateway-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Check committed lockfile
+        run: cargo metadata --locked --no-deps --format-version 1 > /dev/null
+      - name: Format check
+        run: cargo fmt --all -- --check
+      - name: Tests
+        run: cargo test --workspace --locked
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: UI model tests
+        run: node --test ui/tests/*.test.mjs
