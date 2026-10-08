@@ -534,7 +534,11 @@ impl JevAskPolicy {
         request: &InferenceRequest,
         task_summary: &str,
     ) -> Result<InferenceRequest, RouteError> {
-        if request.candidates.len() > 24 || task_summary.trim().is_empty() {
+        if request.candidates.len() > 24
+            || task_summary.trim().is_empty()
+            || task_summary.chars().count() > 1000
+            || task_summary.chars().any(char::is_control)
+        {
             return Err(RouteError::InvalidDecision);
         }
         let eligible: Vec<(usize, &ModelSpec)> = request
@@ -563,9 +567,8 @@ impl JevAskPolicy {
                 )),
             );
         }
-        let summary: String = task_summary.chars().take(1000).collect();
         let payload = json!({
-            "state": {"task": summary, "purpose": "HQ model selection"},
+            "state": {"task": task_summary, "purpose": "HQ model selection"},
             "questions": {
                 "model": {
                     "type": "choice",

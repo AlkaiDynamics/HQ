@@ -3,8 +3,7 @@
 use neurite_core::{EntityId, IdNamespace, SpatialState};
 use neurite_execution::{ExecutionEngine, ReceiptStore, RunSpec, SourceRef};
 use neurite_model_gateway::{
-    ChatMessage, Gateway, InferenceRequest, JevAskPolicy, ModelSpec, OllamaAdapter,
-    OpenAiCompatibleAdapter,
+    Gateway, InferenceRequest, JevAskPolicy, ModelSpec, OllamaAdapter, OpenAiCompatibleAdapter,
 };
 use neurite_protocol::ProtocolId;
 use neurite_scene::SpatialEntity;
@@ -56,6 +55,17 @@ fn original_kernel_demo() {
 
 fn required_env(name: &str) -> Result<String, String> {
     env::var(name).map_err(|_| format!("required setting {name} is missing"))
+}
+
+fn jev_summary_from_env() -> Result<String, String> {
+    let summary = required_env("HQ_JEV_TASK_SUMMARY")?;
+    if summary.trim().is_empty()
+        || summary.chars().count() > 1000
+        || summary.chars().any(char::is_control)
+    {
+        return Err("HQ_JEV_TASK_SUMMARY must be non-empty, single-line, and at most 1000 characters".into());
+    }
+    Ok(summary)
 }
 
 fn register_provider(
@@ -143,22 +153,24 @@ fn agent_command(execute: bool) -> Result<(), String> {
 
     let run_id = env::var("HQ_RUN_ID").unwrap_or_else(|_| "preview".into());
     let mut spec = RunSpec::new(run_id, prompt.clone(), sources, candidates);
-    if let Ok(key_path) = env::var("HQ_JEV_KEY_FILE") {
-        let key = std::fs::read_to_string(key_path)
-            .map_err(|error| format!("cannot read HQ_JEV_KEY_FILE: {error}"))?;
-        let url = env::var("HQ_JEV_URL").unwrap_or_else(|_| "http://127.0.0.1:4319".into());
-        let policy = JevAskPolicy::new(&url, key.trim())
-            .map_err(|error| format!("invalid Jev configuration: {error:?}"))?;
-        let ranked = policy
-            .rank(
-                &InferenceRequest::new(
-                    vec![ChatMessage::user(prompt.clone())],
-                    spec.candidates.clone(),
-                ),
-                &prompt,
-            )
-            .map_err(|error| format!("Jev routing rejected: {error:?}"))?;
-        spec.candidates = ranked.candidates;
+    if execute {
+        if let Ok(key_path) = env::var("HQ_JEV_KEY_FILE") {
+            // An explicit routing summary prevents accidentally disclosing the
+            // full user prompt or imported workspace content through Jev.
+            let routing_summary = jev_summary_from_env()?;
+            let key = std::fs::read_to_string(key_path)
+                .map_err(|error| format!("cannot read HQ_JEV_KEY_FILE: {error}"))?;
+            let url = env::var("HQ_JEV_URL").unwrap_or_else(|_| "http://127.0.0.1:4319".into());
+            let policy = JevAskPolicy::new(&url, key.trim())
+                .map_err(|error| format!("invalid Jev configuration: {error:?}"))?;
+            let ranked = policy
+                .rank(
+                    &InferenceRequest::new(Vec::new(), spec.candidates.clone()),
+                    &routing_summary,
+                )
+                .map_err(|error| format!("Jev routing rejected: {error:?}"))?;
+            spec.candidates = ranked.candidates;
+        }
     }
 
     let receipts =
@@ -174,6 +186,9 @@ fn agent_command(execute: bool) -> Result<(), String> {
         println!("=== SELECTED CANDIDATE ORDER ===");
         for candidate in spec.candidates {
             println!("{} / {}", candidate.provider.as_str(), candidate.model);
+        }
+        if env::var_os("HQ_JEV_KEY_FILE").is_some() {
+            println!("Jev choice deferred until --agent-run.");
         }
         return Ok(());
     }

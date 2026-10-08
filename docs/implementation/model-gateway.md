@@ -91,3 +91,31 @@ HTTP host restrictions, request cancellation and audit-safe error handling.
 - This does **not** confirm two live configured providers, prompt redaction
   through Jev, native 2D/3D UI integration, or transaction-safe workspace
   persistence. These remain release gates.
+
+## Jev privacy gate
+
+HQ's headless CLI never sends the entire user prompt to Jev as a routing
+summary. To opt into Jev, configure both `HQ_JEV_KEY_FILE` (the local
+relay's bearer credential file) and a separately authored, bounded
+`HQ_JEV_TASK_SUMMARY` (single line, at most 1000 characters). If the
+routing summary is absent or invalid, `--agent-run` fails before making
+a router or model request; there is no automatic prompt fallback.
+
+Example PowerShell configuration, with no secrets embedded in commands:
+
+```powershell
+$env:HQ_JEV_KEY_FILE = 'C:\path\to\jev-caller-secret'
+$env:HQ_JEV_TASK_SUMMARY = 'Routine short-answer text question with selected reference notes'
+```
+
+`--agent-preview` never calls the Jev endpoint, even when Jev is
+configured. Candidate order displayed during preview is the static order;
+a Jev-assisted run can change it at execution time. The router receives
+the explicit task summary and eligible model descriptors, not workspace
+notes, attached file contents or the prompt supplied through stdin.
+Operators remain responsible for ensuring their chosen task summary
+does not itself disclose sensitive material.
+
+Unit and CLI integration tests cover rejection of absent, oversized and
+multiline summaries and the offline preview path; no real Jev or model
+service has yet been exercised.
