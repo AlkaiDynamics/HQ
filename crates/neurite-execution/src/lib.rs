@@ -342,7 +342,7 @@ impl<'a> ExecutionEngine<'a> {
             spec.candidates.clone(),
         ));
         let sources: Vec<String> = context.source_refs.iter().map(SourceRef::label).collect();
-        let receipt = match &inference {
+        let mut receipt = match &inference {
             Ok(result) => json!({
                 "receipt_version": 1,
                 "run_id": spec.id,
@@ -371,6 +371,18 @@ impl<'a> ExecutionEngine<'a> {
                 })
             }
         };
+        receipt["request_messages"] = json!(context
+            .messages
+            .iter()
+            .map(|m| {
+                let role = match m.role {
+                    neurite_model_gateway::MessageRole::System => "system",
+                    neurite_model_gateway::MessageRole::User => "user",
+                    neurite_model_gateway::MessageRole::Assistant => "assistant",
+                };
+                json!({"role":role,"content":m.content})
+            })
+            .collect::<Vec<_>>());
         self.receipts.commit(&spec.id, &receipt)?;
         inference
             .map(|_| receipt)

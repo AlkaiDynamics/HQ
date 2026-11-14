@@ -14,6 +14,12 @@ use std::path::Path;
 
 fn main() {
     match env::args().nth(1).as_deref() {
+        Some("--agent-run-json") => {
+            if let Err(error) = native_json_command() {
+                eprintln!("HQ native worker error: {error}");
+                std::process::exit(1);
+            }
+        }
         Some("--agent-preview") => {
             if let Err(error) = agent_command(false) {
                 eprintln!("HQ agent preview error: {error}");
@@ -204,5 +210,62 @@ fn agent_command(execute: bool) -> Result<(), String> {
         "HQ receipt={} provider={} model={}",
         spec.id, receipt["selected"]["provider"], receipt["selected"]["model"]
     );
+    Ok(())
+}
+
+// The browser bridge supplies explicit immutable text snapshots. Provider URLs,
+// credentials and receipt paths remain trusted host configuration, not input.
+fn native_json_command() -> Result<(), String> {
+    let mut raw = String::new();
+    io::stdin()
+        .take(64 * 1024 + 1)
+        .read_to_string(&mut raw)
+        .map_err(|e| e.to_string())?;
+    if raw.len() > 64 * 1024 {
+        return Err("Native context is too large".into());
+    }
+    let request: serde_json::Value = serde_json::from_str(&raw).map_err(|e| e.to_string())?;
+    let id = request["id"].as_str().ok_or("Missing run id")?;
+    let prompt = request["prompt"].as_str().ok_or("Missing prompt")?;
+    let mut workspace = Workspace::create("native-neurite");
+    let mut sources = Vec::new();
+    let selected = request["sources"]
+        .as_array()
+        .ok_or("Missing text sources")?;
+    if selected.is_empty() || selected.len() > 100 {
+        return Err("Select 1 to 100 text sources".into());
+    }
+    for (i, source) in selected.iter().enumerate() {
+        let entity = EntityId::scoped(IdNamespace::new(1), i as u64 + 1);
+        let native_id = source["id"].as_str().ok_or("Missing source identity")?;
+        let name = source["name"].as_str().ok_or("Missing source name")?;
+        let text = source["text"].as_str().ok_or("Missing source text")?;
+        workspace.set_note(
+            entity,
+            format!("Native Neurite source [{native_id}] {name}\n{text}"),
+        );
+        sources.push(SourceRef::Note(entity));
+    }
+    let kind = env::var("HQ_PROVIDER").unwrap_or_else(|_| "ollama".into());
+    let model = required_env("HQ_MODEL")?;
+    let url = env::var("HQ_BASE_URL").unwrap_or_else(|_| default_url(&kind).into());
+    let mut gateway = Gateway::new();
+    let candidate = register_provider(
+        &mut gateway,
+        "native",
+        &kind,
+        &url,
+        &model,
+        env::var("HQ_API_KEY").ok(),
+    )?;
+    let spec = RunSpec::new(id, prompt, sources, vec![candidate]);
+    let store = ReceiptStore::new(required_env("HQ_RECEIPTS_DIR")?);
+    let engine = ExecutionEngine::new(&gateway, &store);
+    let execution = engine.run(&workspace, &spec);
+    let receipt = store
+        .read(id)
+        .map_err(|e| format!("Receipt read failed: {e:?}"))?
+        .ok_or_else(|| format!("Worker produced no receipt: {execution:?}"))?;
+    println!("{}", receipt);
     Ok(())
 }

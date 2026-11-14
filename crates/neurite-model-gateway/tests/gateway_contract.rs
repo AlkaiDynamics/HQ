@@ -159,9 +159,30 @@ fn mock_http_once(body: &'static str) -> (String, thread::JoinHandle<()>) {
     let url = format!("http://{}", listener.local_addr().unwrap());
     let worker = thread::spawn(move || {
         let (mut stream, _) = listener.accept().unwrap();
+        stream
+            .set_read_timeout(Some(std::time::Duration::from_secs(5)))
+            .unwrap();
+        let mut request = Vec::new();
         let mut bytes = [0_u8; 8192];
-        let size = stream.read(&mut bytes).unwrap();
-        assert!(size > 0);
+        loop {
+            let size = stream.read(&mut bytes).unwrap();
+            assert!(size > 0, "client closed an incomplete HTTP request");
+            request.extend_from_slice(&bytes[..size]);
+            if let Some(end) = request.windows(4).position(|w| w == b"\r\n\r\n") {
+                let headers = String::from_utf8_lossy(&request[..end]);
+                let length = headers
+                    .lines()
+                    .find_map(|line| {
+                        line.to_ascii_lowercase()
+                            .strip_prefix("content-length:")
+                            .and_then(|v| v.trim().parse::<usize>().ok())
+                    })
+                    .unwrap_or(0);
+                if request.len() >= end + 4 + length {
+                    break;
+                }
+            }
+        }
         let response = format!(
             "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
             body.len(),
