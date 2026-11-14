@@ -1,0 +1,99 @@
+#hq-native {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 100000;
+  max-width: min(420px, calc(100vw - 32px));
+  max-height: 82vh;
+  overflow: auto;
+  color: #e8ebed;
+  background: #20242b;
+  border: 1px solid #6d8090;
+  border-radius: 12px;
+  padding: 10px;
+  font: 14px/1.5 system-ui;
+  box-shadow: 0 4px 24px #0008;
+}
+#hq-native summary {
+  cursor: pointer;
+  padding: 5px;
+  font-weight: 600;
+}
+#hq-native label {
+  display: block;
+  margin: 8px 0;
+}
+#hq-native input,
+#hq-native textarea,
+#hq-native select {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  color: #f0f4f7;
+  background: #13171b;
+  border: 1px solid #8494a0;
+  border-radius: 5px;
+  padding: 8px;
+  font: inherit;
+}
+#hq-native textarea {
+  min-height: 80px;
+}
+#hq-native button {
+  color: #eff4f6;
+  background: #344b55;
+  border: 1px solid #7c96a4;
+  border-radius: 5px;
+  padding: 8px;
+  margin: 4px;
+  cursor: pointer;
+}
+#hq-native button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+#hq-native button:focus-visible,
+#hq-native summary:focus-visible {
+  outline: 3px solid #b9e8ff;
+  outline-offset: 2px;
+}
+#hq-native pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font:
+    12px/1.5 ui-monospace,
+    monospace;
+  max-height: 35vh;
+  overflow: auto;
+}
+#hq-native article {
+  border-top: 1px solid #60717d;
+  padding: 8px 0;
+}
+#hq-native article span {
+  display: block;
+}
+#hq-native dialog {
+  max-width: min(760px, 85vw);
+  max-height: 80vh;
+  color: inherit;
+  background: #20242b;
+  border: 1px solid #859aa6;
+  border-radius: 12px;
+  padding: 20px;
+}
+#hq-native dialog::backdrop {
+  background: #000a;
+}
+#hq-native .hq-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+#hq-native [role="status"] {
+  max-width: 380px;
+}
+#hq-native input[type="checkbox"] {
+  display: inline;
+  width: auto;
+  margin-right: 8px;
+}

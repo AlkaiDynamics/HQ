@@ -1,0 +1,3 @@
+[submodule "upstream/neurite"]
+	path = upstream/neurite
+	url = https://github.com/satellitecomponent/Neurite.git

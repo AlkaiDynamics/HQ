@@ -213,3 +213,23 @@ fn importing_real_utf8_file_snapshots_content_and_rejects_nontext() {
     assert_eq!(workspace.files[&eid(10)].content, "Imported evidence");
     std::fs::remove_dir_all(root).unwrap();
 }
+
+#[test]
+fn receipt_preserves_the_exact_request_after_source_edit() {
+    let mut workspace = Workspace::create("provenance");
+    workspace.set_note(eid(1), "Original source");
+    let (gateway, _) = gateway(Ok("answer"));
+    let root = temp_root();
+    let store = ReceiptStore::new(root.clone());
+    let engine = ExecutionEngine::new(&gateway, &store);
+    let spec = run_spec("provenance", vec![SourceRef::Note(eid(1))]);
+    engine.run(&workspace, &spec).unwrap();
+    workspace.set_note(eid(1), "Edited source");
+    let receipt = store.read("provenance").unwrap().unwrap();
+    assert!(receipt["request_messages"][0]["content"]
+        .as_str()
+        .unwrap()
+        .contains("Original source"));
+    assert_eq!(receipt["request_messages"][1]["role"], "user");
+    std::fs::remove_dir_all(root).unwrap();
+}

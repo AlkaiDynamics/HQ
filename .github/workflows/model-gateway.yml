@@ -1,37 +1,72 @@
-name: Native Rust gateway checks
-
-# Only the PR event triggers automatic validation; do not run the same
-# matrix from both push and pull_request for one feature-branch commit.
+name: Native HQ integration checks
 on:
   pull_request:
-    branches:
-      - impl/neurite-native-kernel
+    branches: [impl/neurite-native-kernel, feat/provider-neutral-model-gateway]
   workflow_dispatch:
-
 concurrency:
   group: gateway-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
+permissions:
+  contents: read
 jobs:
   check:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
-      - name: Check committed lockfile
-        run: cargo metadata --locked --no-deps --format-version 1 > /dev/null
-      - name: Format check
-        run: cargo fmt --all -- --check
-      - name: Tests
-        run: cargo test --workspace --locked
-      - name: Clippy
-        run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-      - name: UI model tests
-        run: node --test ui/tests/*.test.mjs
+          node-version: '24'
+      - name: Dependency locks
+        run: |
+          cargo metadata --locked --no-deps --format-version 1
+          npm ci
+      - name: Format
+        run: |
+          cargo fmt --all -- --check
+          npx --no-install prettier --check native-bridge/*.mjs native-bridge/client.js native-bridge/client.css package.json
+      - name: Rust tests and lint
+        run: |
+          cargo test --workspace --locked
+          cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Native inference worker
+        run: cargo build --release -p neurite-app --locked
+      - name: UI model and native host integration tests
+        run: npm test
+      - name: Install isolated browser
+        if: runner.os == 'Linux'
+        run: npx --no-install playwright install --with-deps chromium
+      - name: Actual Neurite browser journey with fixture provider
+        if: runner.os == 'Linux'
+        run: npm run test:browser
+      - name: Assemble runtime
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force package/native-bridge,package/upstream/neurite,package/target/release,package/runtime | Out-Null
+          Copy-Item native-bridge/* package/native-bridge/ -Recurse
+          Get-ChildItem upstream/neurite -Force | Where-Object { $_.Name -ne '.git' } | Copy-Item -Destination package/upstream/neurite/ -Recurse
+          Copy-Item Start-HQ.cmd,Start-HQ.sh,LICENSE package/
+          Copy-Item native-bridge/README.md package/README.md
+          $nodePath = (Get-Command node).Source
+          Copy-Item $nodePath ('package/runtime/' + $(if ($IsWindows) {'node.exe'} else {'node'}))
+          $version = (node -p process.version).Trim()
+          Invoke-WebRequest ('https://raw.githubusercontent.com/nodejs/node/' + $version + '/LICENSE') -OutFile package/runtime/LICENSE
+          if ($IsWindows) { Copy-Item target/release/neurite-app.exe package/target/release/ } else { Copy-Item target/release/neurite-app package/target/release/ }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: HQ-evidence-${{ matrix.os }}
+          path: test-evidence/*results*.json
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HQ-runtime-${{ matrix.os }}
+          path: package/
