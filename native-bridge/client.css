@@ -1,5 +1,7 @@
 #hq-native {
   position: fixed;
+  inset: auto;
+  margin: 0;
   right: 16px;
   bottom: 16px;
   z-index: 100000;

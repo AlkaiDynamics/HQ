@@ -8,6 +8,14 @@
   section.id = "hq-native";
   section.innerHTML = `<details><summary>HQ · Native activity</summary><p id="hq-host-status" role="status">Connecting…</p><div class="hq-row"><button id="hq-save">Save workspace</button><button id="hq-restore">Reload saved workspace</button></div><details><summary>Local model settings</summary><label>Provider<select id="hq-provider"><option value="ollama">Ollama</option><option value="openai">LM Studio / compatible local server</option></select></label><label>Installed model<input id="hq-model"></label><button id="hq-settings">Save model settings</button></details><details><summary>Add notes or import text</summary><label>Note title<input id="hq-note-title" value="New note"></label><label>Note text<textarea id="hq-note-text"></textarea></label><button id="hq-add-note">Add Neurite note</button><label>Import text file<input id="hq-import" type="file" accept=".txt,.md,.csv,.json"></label><button id="hq-add-agent">Add agent</button></details><label>Agent<select id="hq-agent"></select></label><details><summary>Connect text context</summary><div id="hq-connect-list"></div><button id="hq-connect">Connect checked notes to agent</button></details><label>Task<textarea id="hq-prompt" placeholder="What should this agent do with its connected text notes?"></textarea></label><button id="hq-preview">Preview exact context</button><button id="hq-run" disabled>Run this task</button><details id="hq-context"><summary>Prompt and connected sources</summary><pre></pre></details><div id="hq-runs" aria-label="Persistent agent runs"></div><dialog id="hq-result"><button id="hq-close-result">Close result</button><h3></h3><pre class="hq-output"></pre><details><summary>Source snapshots and provenance</summary><pre class="hq-provenance"></pre></details><button id="hq-keep">Keep result as Neurite note</button></dialog></details>`;
   document.body.append(section);
+  // Neurite transforms its zero-height body. A top-layer portal keeps the HUD
+  // in viewport coordinates without changing the fractal canvas transform.
+  if (typeof section.showPopover === "function") {
+    section.setAttribute("popover", "manual");
+    section.showPopover();
+  } else {
+    document.documentElement.append(section);
+  }
   for (const type of ["mousedown", "pointerdown", "keydown", "keyup", "wheel"])
     section.addEventListener(type, (e) => e.stopPropagation());
   const el = (id) => section.querySelector("#hq-" + id);
