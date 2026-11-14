@@ -10,14 +10,16 @@ test("pinned Neurite saver gains an export/import seam without rewriting existin
     ),
     "utf8",
   );
+  const normalized = source.replace(/\r\n/g, "\n");
   const patched = patchSaveModule(source);
+  assert.equal(patchSaveModule(normalized.replace(/\n/g, "\r\n")), patched);
   assert(patched.includes("nativeExport"));
   assert(patched.includes("nativeImport"));
   assert(
     patched.includes(
-      source.slice(
-        source.indexOf("    #loadGraph(text, importer){"),
-        source.indexOf("    #populateDirectionalityMap"),
+      normalized.slice(
+        normalized.indexOf("    #loadGraph(text, importer){"),
+        normalized.indexOf("    #populateDirectionalityMap"),
       ),
     ),
   );

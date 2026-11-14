@@ -27,7 +27,8 @@
     saveTimer,
     currentResult = null,
     dirty = false,
-    editGeneration = 0;
+    editGeneration = 0,
+    exportDepth = 0;
   const status = (message) => (el("host-status").textContent = message);
   const api = async (path, data) => {
     const r = await fetch("/hq-api/" + path, {
@@ -89,16 +90,21 @@
     return createNodeFromWindow(unique, text);
   }
   async function exportBase64() {
-    const blob = await App.viewGraphs.nativeExport();
-    if (blob.size > 9 * 1024 * 1024)
-      throw Error(
-        "Workspace exceeds this build’s 9 MB limit. Use Neurite export to retain it.",
-      );
-    const bytes = new Uint8Array(await blob.arrayBuffer());
-    let binary = "";
-    for (let i = 0; i < bytes.length; i += 16384)
-      binary += String.fromCharCode(...bytes.subarray(i, i + 16384));
-    return btoa(binary);
+    exportDepth++;
+    try {
+      const blob = await App.viewGraphs.nativeExport();
+      if (blob.size > 9 * 1024 * 1024)
+        throw Error(
+          "Workspace exceeds this build’s 9 MB limit. Use Neurite export to retain it.",
+        );
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      let binary = "";
+      for (let i = 0; i < bytes.length; i += 16384)
+        binary += String.fromCharCode(...bytes.subarray(i, i + 16384));
+      return btoa(binary);
+    } finally {
+      exportDepth--;
+    }
   }
   function save() {
     const next = saving
@@ -216,17 +222,22 @@
     );
   });
   el("run").onclick = act(async () => {
-    if (!preview) throw Error("Preview context first.");
+    const reviewed = preview;
+    if (!reviewed) throw Error("Preview context first.");
     await save();
     const fresh = await api("preview", { context: await context() });
     if (
-      fresh.hash !== preview.hash ||
-      JSON.stringify(fresh.provider) !== JSON.stringify(preview.provider)
+      fresh.hash !== reviewed.hash ||
+      JSON.stringify(fresh.provider) !== JSON.stringify(reviewed.provider)
     ) {
       invalidate();
       throw Error("Context or provider changed. Preview again.");
     }
-    await api("runs", { revision, context: fresh.context, hash: preview.hash });
+    await api("runs", {
+      revision,
+      context: fresh.context,
+      hash: reviewed.hash,
+    });
     invalidate();
     await refresh();
     status("Queued in native host. You can close this browser view.");
@@ -330,7 +341,8 @@
   section.querySelector("details").addEventListener("toggle", listAgents);
   for (const event of ["input", "change", "pointerup", "keyup"])
     document.addEventListener(event, (e) => {
-      if (!ready || section.contains(e.target)) return;
+      if (!ready || section.contains(e.target) || (exportDepth && !e.isTrusted))
+        return;
       dirty = true;
       editGeneration++;
       invalidate();

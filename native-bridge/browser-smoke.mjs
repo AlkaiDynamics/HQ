@@ -139,7 +139,11 @@ try {
     "Run in Rust worker; close browser view while work continues",
     async () => {
       await page.locator("#hq-run").click();
-      await wait(() => host.store.runs().length === 1);
+      await wait(async () => {
+        const message = await page.locator("#hq-host-status").innerText();
+        if (message.startsWith("Action failed:")) throw Error(message);
+        return host.store.runs().length === 1;
+      });
       await page.close();
       await wait(() => host.store.runs()[0].status === "completed");
       assert.match(host.store.runs()[0].result, /Maya/);

@@ -6,6 +6,9 @@ on:
 concurrency:
   group: gateway-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+defaults:
+  run:
+    shell: bash
 permissions:
   contents: read
 jobs:
