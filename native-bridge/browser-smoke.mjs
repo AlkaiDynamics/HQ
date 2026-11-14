@@ -25,27 +25,33 @@ async function check(name, fn) {
   console.log("PASS " + name);
 }
 try {
+  let providerCalls = 0;
   provider = http.createServer(async (req, res) => {
     let text = "";
     for await (const b of req) text += b;
     const body = JSON.parse(text);
     assert(body.messages.some((m) => m.content.includes("Maya")));
-    setTimeout(() => {
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(
-        JSON.stringify({
-          choices: [
-            {
-              message: {
-                role: "assistant",
-                content:
-                  "Fixture response: Maya owns Friday release; Noah tests cancellation.",
+    providerCalls++;
+    const responseTimer = setTimeout(
+      () => {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            choices: [
+              {
+                message: {
+                  role: "assistant",
+                  content:
+                    "Fixture response: Maya owns Friday release; Noah tests cancellation.",
+                },
               },
-            },
-          ],
-        }),
-      );
-    }, 2500);
+            ],
+          }),
+        );
+      },
+      providerCalls === 1 ? 2500 : 20000,
+    );
+    res.once("close", () => clearTimeout(responseTimer));
   });
   await new Promise((r) => provider.listen(0, "127.0.0.1", r));
   process.env.HQ_COMPATIBLE_URL =
@@ -183,11 +189,24 @@ try {
     );
     await page.locator("#hq-run").click();
     await wait(() => host.store.runs().length === 2);
-    await page
+    const cancel = page
       .locator("#hq-runs article")
       .first()
-      .getByRole("button", { name: "Cancel", exact: true })
-      .click();
+      .getByRole("button", { name: "Cancel", exact: true });
+    await page.waitForFunction(() => {
+      const button = document.querySelector(
+        "#hq-runs article:first-child button:last-child",
+      );
+      return button && !button.disabled;
+    });
+    await cancel.focus();
+    // Hold this task across one background poll to verify action focus survives.
+    await page.waitForTimeout(2200);
+    assert(
+      await cancel.evaluate((el) => document.activeElement === el),
+      "Background polling must preserve action focus.",
+    );
+    await cancel.click();
     await wait(() => host.store.runs()[0].status === "cancelled");
   });
   await check(
@@ -227,6 +246,7 @@ try {
     browserErrors: errors,
   });
   console.error(e);
+  console.error("BROWSER_RUNTIME_ERRORS", errors);
   process.exitCode = 1;
 } finally {
   writeFileSync(

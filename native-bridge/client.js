@@ -275,8 +275,16 @@
       el("result").close();
     }
   });
+  let renderedRuns = "";
   async function refresh() {
     const runs = await api("runs");
+    const signature =
+      JSON.stringify(runs) +
+      runs
+        .map((r) => Node.byUuid(r.context.agentId)?.getTitle() || "")
+        .join("\n");
+    if (signature === renderedRuns) return;
+    renderedRuns = signature;
     el("runs").replaceChildren(
       ...runs.map((run) => {
         const row = document.createElement("article");
